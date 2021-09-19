@@ -22,6 +22,9 @@
 	path = Tools/sitl_gazebo
 	url = https://github.com/YongraeKim/PX4-SITL-Swon.git
 	branch = master
+[submodule "Tools/sitl_gazebo/external/OpticalFlow"]
+	path = Tools/sitl_gazebo/external/OpticalFlow
+	url = https://github.com/PX4/OpticalFlow.git
 [submodule "src/lib/matrix"]
 	path = src/lib/matrix
 	url = https://github.com/PX4/Matrix.git
