@@ -51,6 +51,9 @@
  * @author Beat Küng <beat-kueng@gmx.net>
  */
 
+//#define LINUX //if running on windows, comment out this line
+
+
 #include <string>
 #include <algorithm>
 #include <fstream>
@@ -58,6 +61,9 @@
 #include <stdio.h>
 #include <errno.h>
 #include <fcntl.h>
+#ifndef LINUX
+#include <sys/file.h>
+#endif
 #include <sys/stat.h>
 #include <stdlib.h>
 #include <string.h>
@@ -102,7 +108,11 @@ static int create_dirs();
 static int run_startup_script(const std::string &commands_file, const std::string &absolute_binary_path, int instance);
 static std::string get_absolute_binary_path(const std::string &argv0);
 static void wait_to_exit();
+#ifndef LINUX
+static bool is_server_running(int instance, bool server);
+#else
 static bool is_already_running(int instance);
+#endif
 static void print_usage();
 static bool dir_exists(const std::string &path);
 static bool file_exists(const std::string &name);
@@ -157,7 +167,18 @@ int main(int argc, char **argv)
 		}
 
 		PX4_DEBUG("instance: %i", instance);
+#ifndef LINUX
+		if (!is_server_running(instance,true)) {
+			if (errno) {
+				PX4_ERR("Failed to communicate with daemon: %s", strerror(errno));
+				return -1;
+			} else {
+				PX4_ERR("PX4 daemon not running yet");
+			}
 
+			return -1;
+		}
+#else
 		if (!is_already_running(instance)) {
 			if (errno) {
 				PX4_ERR("Failed to communicate with daemon: %s", strerror(errno));
@@ -168,7 +189,7 @@ int main(int argc, char **argv)
 
 			return -1;
 		}
-
+#endif
 		/* Remove the path and prefix. */
 		argv[0] += path_length + strlen(prefix);
 
@@ -240,12 +261,19 @@ int main(int argc, char **argv)
 			} // else: ROS argument (in the form __<name>:=<value>)
 		}
 
+#ifndef LINUX
+		if (is_server_running(instance, true)) {
+			// allow running multiple instances, but the server is only started for the first
+			PX4_INFO("PX4 daemon already running for instance %i (%s)", instance, strerror(errno));
+			return -1;
+		}
+#else
 		if (is_already_running(instance)) {
 			// allow running multiple instances, but the server is only started for the first
 			PX4_INFO("PX4 daemon already running for instance %i (%s)", instance, strerror(errno));
 			return -1;
 		}
-
+#endif
 		int ret = create_symlinks_if_needed(data_path);
 
 		if (ret != PX4_OK) {
@@ -571,7 +599,37 @@ void print_usage()
 	printf("    px4-MODULE [--instance <instance>] command using symlink.\n");
 	printf("        e.g.: px4-commander status\n");
 }
+#ifndef LINUX
+bool is_server_running(int instance, bool server)
+{
+	const std::string file_lock_path = std::string(LOCK_FILE_PATH) + '-' + std::to_string(instance);
+	int fd = open(file_lock_path.c_str(), O_RDWR | O_CREAT, 0666);
 
+	if (fd < 0) {
+		PX4_ERR("is_server_running: failed to create lock file: %s, reason=%s", file_lock_path.c_str(), strerror(errno));
+		return false;
+	}
+	bool result = false;
+
+	// Server is running if the file is already locked.
+	if (flock(fd, LOCK_EX | LOCK_NB) < 0) {
+		if (errno == EWOULDBLOCK) {
+			// a server is running!
+			result = true;
+
+		} else {
+			PX4_ERR("is_server_running: failed to get lock on file: %s, reason=%s", file_lock_path.c_str(), strerror(errno));
+			result = false;
+		}
+	}
+
+	if (result || !server) {
+		close(fd);
+	}
+	errno = 0;
+	return result;
+}
+#else
 bool is_already_running(int instance)
 {
 	const std::string file_lock_path = std::string(LOCK_FILE_PATH) + '-' + std::to_string(instance);
@@ -600,7 +658,7 @@ bool is_already_running(int instance)
 	errno = 0;
 	return false;
 }
-
+#endif
 bool file_exists(const std::string &name)
 {
 	struct stat buffer;
