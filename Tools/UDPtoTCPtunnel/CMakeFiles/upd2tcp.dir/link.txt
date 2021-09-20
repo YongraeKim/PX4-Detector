@@ -1,0 +1,1 @@
+/usr/bin/c++     CMakeFiles/upd2tcp.dir/src/main.cpp.o  -o upd2tcp 
