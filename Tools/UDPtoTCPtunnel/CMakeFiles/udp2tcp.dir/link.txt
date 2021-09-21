@@ -1,0 +1,1 @@
+/usr/bin/c++     CMakeFiles/udp2tcp.dir/src/main.cpp.o  -o udp2tcp 
