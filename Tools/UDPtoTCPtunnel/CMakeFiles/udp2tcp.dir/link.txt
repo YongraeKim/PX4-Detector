@@ -1,1 +1,1 @@
-/usr/bin/c++     CMakeFiles/udp2tcp.dir/src/main.cpp.o  -o udp2tcp 
+/usr/bin/c++     CMakeFiles/udp2tcp.dir/src/main.cpp.o CMakeFiles/udp2tcp.dir/src/UDP_SOCKET.cpp.o  -o udp2tcp /usr/lib/x86_64-linux-gnu/libboost_system.so /usr/lib/x86_64-linux-gnu/libboost_thread.so 
