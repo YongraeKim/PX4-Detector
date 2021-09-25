@@ -14,3 +14,4 @@ link_libraries(
 )
 
 add_executable(udp2tcp src/main.cpp src/UDP_SOCKET.cpp src/TCP_SOCKET.cpp)
+target_link_libraries (udp2tcp ${CMAKE_THREAD_LIBS_INIT})

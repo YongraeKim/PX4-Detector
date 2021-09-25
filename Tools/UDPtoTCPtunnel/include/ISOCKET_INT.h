@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <thread>
 
 #define socket_interface class
 
@@ -19,7 +20,7 @@ public:
     virtual int Receive_Data(uint8_t* buffer, int32_t read_size){return -1;};
     virtual int Write_Data(uint8_t* buffer, int32_t write_size){return -1;};
     virtual void Close_Socket(){};
-    virtual void Receive_Thread(){};
+    virtual void* Connection_Thread(void *arg){};
 
 protected:
     int _socket_fd = -1;
@@ -34,4 +35,6 @@ protected:
     bool _is_bind = false;
     bool _is_listen = false;
     bool _is_accept = false;
+    pthread_t connection_thread_handle;
+    int connection_thread_id;
 };

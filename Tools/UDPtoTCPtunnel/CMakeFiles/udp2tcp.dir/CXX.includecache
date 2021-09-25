@@ -53,6 +53,8 @@ sys/socket.h
 -
 arpa/inet.h
 -
+thread
+-
 
 include/TCP_SOCKET.h
 vector

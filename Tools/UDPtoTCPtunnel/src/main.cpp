@@ -31,6 +31,7 @@ void signalingHandler(int signo)
     cout << "Exit code captured"<<endl;
     cout <<"[UDP2TCP INFO] Exit program"<<endl;
     exit_code = 1;
+    std::terminate();
 }
 
 int main()
@@ -38,7 +39,7 @@ int main()
     breakCapture = signal(SIGINT, signalingHandler);
     cout <<"UDP to TCP tunneling"<<endl;
     UDP_SOCKET *udp = new UDP_SOCKET("127.0.0.1",UDP_PORT,BUFFER_SIZE,UDP_SOCKET_TYPE::UDP_CLIENT);
-    TCP_SOCKET *tcp = new TCP_SOCKET("NULL",1234,BUFFER_SIZE,TCP_SOCKET_TYPE::TCP_SOCKET_SERVER,1);
+    TCP_SOCKET *tcp = new TCP_SOCKET("NULL",1726,BUFFER_SIZE,TCP_SOCKET_TYPE::TCP_SOCKET_SERVER,1);
     udp_exit = udp;
     tcp_exit = tcp;
     udp->Create_Socket();
@@ -46,32 +47,13 @@ int main()
     tcp->Create_Socket();
     tcp->Bind();
     tcp->Listen();
-    uint8_t received_buffer[BUFFER_SIZE]={0,};
+    cout <<"[UDP2TCP INFO] start tunneling"<<endl;
     while(exit_code != 1)
     {
-        if(tcp->Accept()==true)
-        {
-            cout << "client connected"<<endl;
-        }
-        else
-        {
-            cout <<"accept failed"<<endl;
-        }
-        // int received = udp->Receive_Data(received_buffer,BUFFER_SIZE);
-        // if(received!=-1)
-        // {
-        //     for(int i=0;i<received;i++)
-        //     {
-        //         printf("%x ",received_buffer[i]);
-        //     }
-        //     printf("\r\n");
-        // }
-        // else
-        // {
-        //     cout << "nothing recv"<<endl;
-        // }
+
     }
     udp->Close_Socket();
+    tcp->Close_Socket();
     delete udp;
     delete tcp;
     cout <<"end UDP to TCP tunneling"<<endl;

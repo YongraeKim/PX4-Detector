@@ -6,6 +6,26 @@ using namespace std;
 
 TCP_SOCKET::TCP_SOCKET(const char *ipv4_address, int32_t port, int32_t buffersize, TCP_SOCKET_TYPE socket_type)
 {
+    Initialize(ipv4_address,port,buffersize,socket_type);
+}
+
+TCP_SOCKET::TCP_SOCKET(const char *ipv4_address, int32_t port, int32_t buffersize, TCP_SOCKET_TYPE socket_type, int max_connection_number)
+{
+    Initialize(ipv4_address,port,buffersize,socket_type);
+    _max_connection_number = max_connection_number;
+    _connection.clear();
+    _connection.empty();
+}
+
+TCP_SOCKET::~TCP_SOCKET()
+{
+    Close_Socket();
+    exit_code = 1;
+}
+
+
+void TCP_SOCKET::Initialize(const char *ipv4_address, int32_t port, int32_t buffersize, TCP_SOCKET_TYPE socket_type)
+{
     memset(&_socket_address,0,sizeof(_socket_address));
     if(socket_type == TCP_SOCKET_TYPE::TCP_SOCKET_CLIENT)
     {
@@ -21,19 +41,6 @@ TCP_SOCKET::TCP_SOCKET(const char *ipv4_address, int32_t port, int32_t buffersiz
     this->_buffersize = buffersize;
 }
 
-TCP_SOCKET::TCP_SOCKET(const char *ipv4_address, int32_t port, int32_t buffersize, TCP_SOCKET_TYPE socket_type, int max_connection_number)
-{
-    TCP_SOCKET(ipv4_address,port,buffersize,socket_type);
-    _max_connection_number = max_connection_number;
-    _connection.clear();
-    _connection.empty();
-}
-
-TCP_SOCKET::~TCP_SOCKET()
-{
-    Close_Socket();
-}
-
 int TCP_SOCKET::Create_Socket()
 {
     _socket_fd = socket(PF_INET,SOCK_STREAM,0);
@@ -46,6 +53,7 @@ bool TCP_SOCKET::Bind()
     _last_error_code = bind(_socket_fd,(struct sockaddr*)&_socket_address,sizeof(_socket_address));
     if(_last_error_code>-1)
     {
+        cout <<"[TCP_INFO] Bind succeeded" <<endl;
         _is_bind = true;
     }
     else
@@ -67,11 +75,54 @@ bool TCP_SOCKET::Listen()
     }
     else
     {
+        cout <<"[TCP_INFO] Listen socket opened"<<endl;
+        connection_thread_id = pthread_create(&connection_thread_handle,0,Connection_Thread_Member,this);
         _is_listen = true;
     }
     return _is_listen;
 }
 
+void* TCP_SOCKET::Connection_Thread_Member(void* arg)
+{
+    TCP_SOCKET *ptcp_socket = (TCP_SOCKET*)arg;
+    return (void*)ptcp_socket->Connection_Thread(arg);
+}
+
+void* TCP_SOCKET::Connection_Thread(void *arg)
+{
+    cout << "[TCP_INFO] Start linten"<<endl;
+
+    while(exit_code!=1)
+    {
+        if(Accept()==true)
+        {
+            cout << "client connected"<<endl;
+        }
+        else
+        {
+            cout <<"accept failed"<<endl;
+        }
+    }
+    exit_code = 2;
+    cout << "[TCP_INFO] lintening thread terminated"<<endl;
+}
+
+void TCP_SOCKET::Connection_Callback_Member(void* class_ptr, void* connection_ptr)
+{
+    TCP_SOCKET* ptcp_socket = (TCP_SOCKET*)class_ptr;
+    return ptcp_socket->Connection_Callback(connection_ptr);
+}
+
+void TCP_SOCKET::Connection_Callback(void* pconnection_arg)
+{
+    tcp_connection::TCP_CONNECTION connection_registered = (tcp_connection::TCP_CONNECTION &)pconnection_arg;
+    vector<tcp_connection::TCP_CONNECTION>::iterator iter = find_if(_connection.begin(),_connection.end(),connection_registered);
+    if(iter!=_connection.end())
+    {
+        _connection.erase(iter);
+    }
+
+}
 void TCP_SOCKET::Close_Socket()
 {
     if(_socket_fd !=-1)
@@ -90,8 +141,10 @@ void TCP_SOCKET::Close_Socket()
 
 bool TCP_SOCKET::Accept()
 {
+    cout <<"[TCP_INFO] Wait for accept clinets..."<<endl;
     _socket_cs = accept(_socket_fd,(struct sockaddr*)&_socket_cs_address,&_socket_address_cs_length);
-    TCP_CONNECTION connection_candidate;
+    cout <<"[TCP_INFO] Detect accessing to server..."<<endl;
+    tcp_connection::TCP_CONNECTION connection_candidate;
     connection_candidate.address = _socket_cs_address;
     connection_candidate.socket_fd = _socket_cs;
     char connection_string[INET_ADDRSTRLEN];
@@ -109,7 +162,7 @@ bool TCP_SOCKET::Accept()
     }
     if(_connection.size()<=_max_connection_number && _is_accept == true)
     {
-        vector<TCP_CONNECTION>::iterator iter = find_if(_connection.begin(),_connection.end(),connection_candidate);
+        vector<tcp_connection::TCP_CONNECTION>::iterator iter = find_if(_connection.begin(),_connection.end(),connection_candidate);
         
         if(iter != _connection.end())
         {
@@ -119,6 +172,7 @@ bool TCP_SOCKET::Accept()
         }
         else
         {
+            connection_candidate.Start_Communication(Connection_Callback_Member,this);
             _connection.push_back(connection_candidate);
             _is_accept = true;
             cout <<"[TCP_INFO] Connection established to "<<connection_string<<endl;
