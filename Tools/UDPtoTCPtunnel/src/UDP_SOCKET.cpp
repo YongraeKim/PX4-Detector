@@ -19,7 +19,7 @@ UDP_SOCKET::UDP_SOCKET(const char* ipv4_address,uint16_t port, int32_t buffersiz
 
 UDP_SOCKET::~UDP_SOCKET()
 {
-    Close_UDP();
+    Close_Socket();
 }
 
 int UDP_SOCKET::Create_Socket()
@@ -29,7 +29,7 @@ int UDP_SOCKET::Create_Socket()
     return _last_error_code;
 }
 
-bool UDP_SOCKET::Bind_UDP()
+bool UDP_SOCKET::Bind()
 {
     _last_error_code = bind(_socket_fd,(struct sockaddr*)&_socket_address,sizeof(_socket_address));
     if(_last_error_code>-1)
@@ -44,7 +44,7 @@ bool UDP_SOCKET::Bind_UDP()
 }
 
 
-int UDP_SOCKET::Receive_UDP_Data(uint8_t* buffer, int32_t read_size)
+int UDP_SOCKET::Receive_Data(uint8_t* buffer, int32_t read_size)
 {
     int received_size = -1;
     if(_is_bind)
@@ -65,12 +65,18 @@ int UDP_SOCKET::Receive_UDP_Data(uint8_t* buffer, int32_t read_size)
     }
     return received_size;
 }
-bool UDP_SOCKET::Write_UDP_Data(uint8_t* buffer, int32_t write_size)
+int UDP_SOCKET::Write_Data(uint8_t* buffer, int32_t write_size)
 {
-
+    int transmitted_size = -1;
+    if(_is_bind)
+    {
+        transmitted_size = sendto(_socket_fd,buffer,write_size,0,
+                                (struct sockaddr*)&_socket_address,sizeof(_socket_address)); 
+    }    
+    return transmitted_size;
 }
 
-void UDP_SOCKET::Close_UDP()
+void UDP_SOCKET::Close_Socket()
 {
     if(_socket_fd!=-1)
     {

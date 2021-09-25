@@ -1,5 +1,12 @@
 #include <iostream>
+#include <signal.h>
+#include <sys/types.h>
+#include <cstdio>
+#include <sys/stat.h>
+#include <cstdlib>
+#include <unistd.h>
 #include "UDP_SOCKET.h"
+#include "TCP_SOCKET.h"
 // #include <string.h>
 // #include <unistd.h>
 // #include <netdb.h>
@@ -14,29 +21,59 @@ using namespace std;
 #define BUFFER_SIZE 4096
 #define SOCKFD_EMPTY -1
 
+UDP_SOCKET* udp_exit = nullptr;
+TCP_SOCKET* tcp_exit = nullptr;
+
+void (*breakCapture)(int);
+int exit_code = -1;
+void signalingHandler(int signo) 
+{
+    cout << "Exit code captured"<<endl;
+    cout <<"[UDP2TCP INFO] Exit program"<<endl;
+    exit_code = 1;
+}
+
 int main()
 {
+    breakCapture = signal(SIGINT, signalingHandler);
     cout <<"UDP to TCP tunneling"<<endl;
     UDP_SOCKET *udp = new UDP_SOCKET("127.0.0.1",UDP_PORT,BUFFER_SIZE,UDP_SOCKET_TYPE::UDP_CLIENT);
-    
+    TCP_SOCKET *tcp = new TCP_SOCKET("NULL",1234,BUFFER_SIZE,TCP_SOCKET_TYPE::TCP_SOCKET_SERVER,1);
+    udp_exit = udp;
+    tcp_exit = tcp;
     udp->Create_Socket();
-    udp->Bind_UDP();
-    int exit_code = 1;
+    udp->Bind();
+    tcp->Create_Socket();
+    tcp->Bind();
+    tcp->Listen();
     uint8_t received_buffer[BUFFER_SIZE]={0,};
-    while(exit_code != -1)
+    while(exit_code != 1)
     {
-        int received = udp->Receive_UDP_Data(received_buffer,BUFFER_SIZE);
-        if(received!=-1)
+        if(tcp->Accept()==true)
         {
-            for(int i=0;i<received;i++)
-            {
-                printf("%x ",received_buffer[i]);
-            }
-            printf("\r\n");
+            cout << "client connected"<<endl;
         }
+        else
+        {
+            cout <<"accept failed"<<endl;
+        }
+        // int received = udp->Receive_Data(received_buffer,BUFFER_SIZE);
+        // if(received!=-1)
+        // {
+        //     for(int i=0;i<received;i++)
+        //     {
+        //         printf("%x ",received_buffer[i]);
+        //     }
+        //     printf("\r\n");
+        // }
+        // else
+        // {
+        //     cout << "nothing recv"<<endl;
+        // }
     }
-
+    udp->Close_Socket();
     delete udp;
+    delete tcp;
     cout <<"end UDP to TCP tunneling"<<endl;
 }
 
