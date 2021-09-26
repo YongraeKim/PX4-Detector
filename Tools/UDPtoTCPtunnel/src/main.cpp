@@ -37,6 +37,7 @@ void signalingHandler(int signo)
 int main()
 {
     breakCapture = signal(SIGINT, signalingHandler);
+    signal(SIGPIPE, SIG_IGN);
     cout <<"UDP to TCP tunneling"<<endl;
     UDP_SOCKET *udp = new UDP_SOCKET("127.0.0.1",UDP_PORT,BUFFER_SIZE,UDP_SOCKET_TYPE::UDP_CLIENT);
     TCP_SOCKET *tcp = new TCP_SOCKET("NULL",1726,BUFFER_SIZE,TCP_SOCKET_TYPE::TCP_SOCKET_SERVER,1);
@@ -45,7 +46,11 @@ int main()
     udp->Create_Socket();
     udp->Bind();
     tcp->Create_Socket();
-    tcp->Bind();
+    if(tcp->Bind()==false)
+    {
+        cout <<"[TCP_ERROR] Stop executing tunneling"<<endl;
+        return 0;
+    }
     tcp->Listen();
     cout <<"[UDP2TCP INFO] start tunneling"<<endl;
     while(exit_code != 1)

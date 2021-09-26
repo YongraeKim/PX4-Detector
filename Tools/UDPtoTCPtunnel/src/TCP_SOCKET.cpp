@@ -115,13 +115,15 @@ void TCP_SOCKET::Connection_Callback_Member(void* class_ptr, void* connection_pt
 
 void TCP_SOCKET::Connection_Callback(void* pconnection_arg)
 {
-    tcp_connection::TCP_CONNECTION connection_registered = (tcp_connection::TCP_CONNECTION &)pconnection_arg;
-    vector<tcp_connection::TCP_CONNECTION>::iterator iter = find_if(_connection.begin(),_connection.end(),connection_registered);
+    tcp_connection::TCP_CONNECTION *connection_registered = (tcp_connection::TCP_CONNECTION *)pconnection_arg;
+    vector<tcp_connection::TCP_CONNECTION*>::iterator iter = find_if(_connection.begin(),_connection.end(),[&](tcp_connection::TCP_CONNECTION* ptr_elem){return ptr_elem==connection_registered;});
     if(iter!=_connection.end())
     {
         _connection.erase(iter);
     }
-
+    connection_registered->End_Communication();
+    delete connection_registered;
+    cout <<"[TCP_INFO] End tcp connection"<<endl;
 }
 void TCP_SOCKET::Close_Socket()
 {
@@ -144,11 +146,11 @@ bool TCP_SOCKET::Accept()
     cout <<"[TCP_INFO] Wait for accept clinets..."<<endl;
     _socket_cs = accept(_socket_fd,(struct sockaddr*)&_socket_cs_address,&_socket_address_cs_length);
     cout <<"[TCP_INFO] Detect accessing to server..."<<endl;
-    tcp_connection::TCP_CONNECTION connection_candidate;
-    connection_candidate.address = _socket_cs_address;
-    connection_candidate.socket_fd = _socket_cs;
+    tcp_connection::TCP_CONNECTION *connection_candidate = new tcp_connection::TCP_CONNECTION;
+    connection_candidate->address = _socket_cs_address;
+    connection_candidate->socket_fd = _socket_cs;
     char connection_string[INET_ADDRSTRLEN];
-    inet_ntop(AF_INET,&connection_candidate.address.sin_addr,connection_string,INET_ADDRSTRLEN);
+    inet_ntop(AF_INET,&connection_candidate->address.sin_addr,connection_string,INET_ADDRSTRLEN);
     cout<<"[TCP_INFO] Connection request from "<<connection_string<<endl;
     _last_error_code = _socket_cs;
     if(_last_error_code <0)
@@ -160,19 +162,20 @@ bool TCP_SOCKET::Accept()
     {
         _is_accept = true;
     }
-    if(_connection.size()<=_max_connection_number && _is_accept == true)
+    if(_connection.size()<_max_connection_number && _is_accept == true)
     {
-        vector<tcp_connection::TCP_CONNECTION>::iterator iter = find_if(_connection.begin(),_connection.end(),connection_candidate);
+        vector<tcp_connection::TCP_CONNECTION*>::iterator iter = find_if(_connection.begin(),_connection.end(),[&](tcp_connection::TCP_CONNECTION* ptr_elem){return ptr_elem==connection_candidate;});
         
         if(iter != _connection.end())
         {
-            close(connection_candidate.socket_fd);
+            close(connection_candidate->socket_fd);
+            delete connection_candidate;
             cout <<"[TCP_ERROR] Socket already opened"<<endl;
             _is_accept = false;
         }
         else
         {
-            connection_candidate.Start_Communication(Connection_Callback_Member,this);
+            connection_candidate->Start_Communication(Connection_Callback_Member,this);
             _connection.push_back(connection_candidate);
             _is_accept = true;
             cout <<"[TCP_INFO] Connection established to "<<connection_string<<endl;
@@ -180,7 +183,8 @@ bool TCP_SOCKET::Accept()
     }
     else
     {
-        close(connection_candidate.socket_fd);
+        close(connection_candidate->socket_fd);
+        delete connection_candidate;
         cout <<"[TCP_ERROR] Maximum number of connection reached"<<endl;
         _is_accept = false;
     }

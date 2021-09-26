@@ -14,13 +14,19 @@ namespace tcp_connection
     class TCP_CONNECTION
     {
     public:
+        TCP_CONNECTION(){};
+        virtual ~TCP_CONNECTION(){};
         struct sockaddr_in address;
         int socket_fd;
-        bool operator()(TCP_CONNECTION connection)
-        {
-            return (connection.address.sin_addr.s_addr == address.sin_addr.s_addr &&
-                connection.address.sin_port == address.sin_port);
-        }
+        // bool operator()(TCP_CONNECTION *connection)
+        // {
+        //      return (connection->address.sin_addr.s_addr == address.sin_addr.s_addr &&
+        //          connection->address.sin_port == address.sin_port);
+        // }
+        // bool operator()(TCP_CONNECTION *connection)
+        // {
+        //      return (connection == this);
+        // }
         void Start_Communication(void (*callback_function)(void*,void*),void* arg)
         {
             callback_registered = callback_function;
@@ -35,8 +41,6 @@ namespace tcp_connection
             {
                 pthread_join(thread_handle,&return_val);
             }
-            callback_registered(ptcp_socket,this);
-            
         }
     private:
         int exit_code = -1;
@@ -52,11 +56,21 @@ namespace tcp_connection
         }
         void* data_thread(void* arg)
         {
+            char buf[]="ping\r\n";
+            int is_written = -1;
+            int counter = 0;
             while(exit_code !=1)
             {
-
+                is_written = write(socket_fd,buf,sizeof(buf));
+                if(is_written<0)
+                {
+                    
+                }
+                std::cout <<is_written <<std::endl;
+                sleep(1);
             }
             exit_code = 2;
+            std::cout<<"exit data thread"<<std::endl;
             pthread_exit(&exit_code);
         }
     };
@@ -85,6 +99,6 @@ public:
     
 private:
     int _max_connection_number;
-    std::vector<tcp_connection::TCP_CONNECTION> _connection;
+    std::vector<tcp_connection::TCP_CONNECTION*> _connection;
     int exit_code = -1;
 };
