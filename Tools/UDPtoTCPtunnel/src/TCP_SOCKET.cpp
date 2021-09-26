@@ -116,14 +116,14 @@ void TCP_SOCKET::Connection_Callback_Member(void* class_ptr, void* connection_pt
 void TCP_SOCKET::Connection_Callback(void* pconnection_arg)
 {
     tcp_connection::TCP_CONNECTION *connection_registered = (tcp_connection::TCP_CONNECTION *)pconnection_arg;
+    connection_registered->End_Communication();
     vector<tcp_connection::TCP_CONNECTION*>::iterator iter = find_if(_connection.begin(),_connection.end(),[&](tcp_connection::TCP_CONNECTION* ptr_elem){return ptr_elem==connection_registered;});
     if(iter!=_connection.end())
     {
         _connection.erase(iter);
     }
-    connection_registered->End_Communication();
+    cout <<"[TCP_INFO] Delete TCP connection"<<endl;
     delete connection_registered;
-    cout <<"[TCP_INFO] End tcp connection"<<endl;
 }
 void TCP_SOCKET::Close_Socket()
 {

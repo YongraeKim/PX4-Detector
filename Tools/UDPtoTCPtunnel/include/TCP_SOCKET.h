@@ -27,20 +27,21 @@ namespace tcp_connection
         // {
         //      return (connection == this);
         // }
-        void Start_Communication(void (*callback_function)(void*,void*),void* arg)
+        void Start_Communication(void (*callback_function)(void*,void*),void* arg0)
         {
             callback_registered = callback_function;
             thread_id = pthread_create(&thread_handle,0,data_thread_member,this);
-            ptcp_socket = arg;
+            ptcp_socket = this;
+            callback_class = arg0;
         }
         void End_Communication()
         {
             exit_code = 1;
-            void *return_val = 0;
-            while(*((int*)return_val) !=2) //wait for thread exit
-            {
-                pthread_join(thread_handle,&return_val);
-            }
+            // void *return_val = 0;
+            // while(*((int*)return_val) !=2) //wait for thread exit
+            // {
+            //     pthread_join(thread_handle,&return_val);
+            // }
         }
     private:
         int exit_code = -1;
@@ -48,7 +49,7 @@ namespace tcp_connection
         pthread_t thread_handle;
         void * ptcp_socket = nullptr;
         void (*callback_registered)(void *,void *);
-        void* callback_class;
+        void* callback_class = nullptr;
         static void* data_thread_member(void* arg)
         {
             TCP_CONNECTION* ptcp_connection = (TCP_CONNECTION*)arg;
@@ -64,12 +65,21 @@ namespace tcp_connection
                 is_written = write(socket_fd,buf,sizeof(buf));
                 if(is_written<0)
                 {
-                    
+                    counter++;
                 }
-                std::cout <<is_written <<std::endl;
+                else
+                {
+                    counter = 0;
+                }
+                if(counter>1)
+                {
+                    exit_code = 1;
+                }
                 sleep(1);
             }
             exit_code = 2;
+            std::cout<<"exit data thread"<<std::endl;
+            callback_registered(callback_class,(void*)this);
             std::cout<<"exit data thread"<<std::endl;
             pthread_exit(&exit_code);
         }
