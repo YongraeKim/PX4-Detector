@@ -191,11 +191,19 @@ bool TCP_SOCKET::Accept()
     return _is_accept;
 }
 
+//Receive outside from TCP_SOCKET, and transmit to TCP client
 int TCP_SOCKET::Receive_Data(uint8_t* buffer, int32_t read_size)
 {
+    vector<tcp_connection::TCP_CONNECTION*>::iterator iter = _connection.begin();
+    for(iter;iter<_connection.end();++iter)
+    {
+        tcp_connection::TCP_CONNECTION* connection = (tcp_connection::TCP_CONNECTION*)*iter;
+        connection->Transmit_UDP_Data(buffer,read_size);
+    }
     return -1;
 }
 
+//Receive from TCP client, and transmit outside from TCP_SOCKET
 int TCP_SOCKET::Write_Data(uint8_t* buffer, int32_t write_size)
 {
     return -1;

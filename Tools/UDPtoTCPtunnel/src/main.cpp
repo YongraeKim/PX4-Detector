@@ -7,13 +7,6 @@
 #include <unistd.h>
 #include "UDP_SOCKET.h"
 #include "TCP_SOCKET.h"
-// #include <string.h>
-// #include <unistd.h>
-// #include <netdb.h>
-// #include <netinet/in.h>
-// #include <sys/types.h>
-// #include <sys/socket.h>
-// #include <arpa/inet.h>
 
 using namespace std;
 
@@ -53,9 +46,13 @@ int main()
     }
     tcp->Listen();
     cout <<"[UDP2TCP INFO] start tunneling"<<endl;
+
+    uint8_t data_from_udp[BUFFER_SIZE] = {0,};
+    int32_t data_from_udp_length = -1;
     while(exit_code != 1)
     {
-
+        data_from_udp_length=udp->Receive_Data(data_from_udp,BUFFER_SIZE);
+        tcp->Receive_Data(data_from_udp,data_from_udp_length);
     }
     udp->Close_Socket();
     tcp->Close_Socket();

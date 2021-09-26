@@ -15,9 +15,24 @@ namespace tcp_connection
     {
     public:
         TCP_CONNECTION(){};
-        virtual ~TCP_CONNECTION(){};
+        virtual ~TCP_CONNECTION(){
+            if(transmit_buffer!=nullptr)
+            {
+                delete transmit_buffer;
+                transmit_buffer = nullptr;
+            }
+            if(receive_buffer!=nullptr)
+            {
+                delete receive_buffer;
+                receive_buffer = nullptr;
+            }
+            if(socket_fd!=-1)
+            {
+                close(socket_fd);
+            }
+        };
         struct sockaddr_in address;
-        int socket_fd;
+        int socket_fd=-1;
         // bool operator()(TCP_CONNECTION *connection)
         // {
         //      return (connection->address.sin_addr.s_addr == address.sin_addr.s_addr &&
@@ -29,27 +44,103 @@ namespace tcp_connection
         // }
         void Start_Communication(void (*callback_function)(void*,void*),void* arg0)
         {
-            callback_registered = callback_function;
-            thread_id = pthread_create(&thread_handle,0,data_thread_member,this);
-            ptcp_socket = this;
-            callback_class = arg0;
+            // callback_registered = callback_function;
+            // thread_id = pthread_create(&thread_handle,0,data_thread_member,this);
+            // ptcp_socket = this;
+            // callback_class = arg0;
+            Register_Callback_Info(callback_function,arg0);
+            buffer_size = 4096;
+            transmit_buffer = new uint8_t[4096];
+            receive_buffer = new uint8_t[4096];
+        }
+        void Start_Communication(void (*callback_function)(void*,void*),void* arg0,int32_t buffer_size)
+        {
+            // callback_registered = callback_function;
+            // thread_id = pthread_create(&thread_handle,0,data_thread_member,this);
+            // ptcp_socket = this;
+            // callback_class = arg0;
+            Register_Callback_Info(callback_function,arg0);
+            this->buffer_size = buffer_size;
+            transmit_buffer = new uint8_t[this->buffer_size];
+            receive_buffer = new uint8_t[this->buffer_size];
         }
         void End_Communication()
         {
             exit_code = 1;
-            // void *return_val = 0;
-            // while(*((int*)return_val) !=2) //wait for thread exit
-            // {
-            //     pthread_join(thread_handle,&return_val);
-            // }
+        }
+        bool Transmit_UDP_Data(uint8_t* udp_data, int32_t length)
+        {
+            bool is_valid = false;
+            pthread_mutex_lock(&mutex_receive);
+            if(length<buffer_size)
+            {
+                memcpy(receive_buffer,udp_data,length);
+                receive_buffer_length = length;
+                is_valid = true;
+            }
+            else
+            {
+                memcpy(receive_buffer,udp_data,buffer_size);
+                receive_buffer_length = buffer_size;
+                is_valid = false;
+            }
+            pthread_mutex_unlock(&mutex_receive);
+            return is_valid;
         }
     private:
+        uint8_t *transmit_buffer = nullptr;
+        uint8_t *receive_buffer = nullptr;
+        int32_t transmit_buffer_length = 0;
+        int32_t receive_buffer_length = 0;
+        int32_t buffer_size = -1;
+        pthread_mutex_t mutex_transmit;
+        pthread_mutex_t mutex_receive;
+        pthread_mutex_t mutex_ping;
         int exit_code = -1;
         int thread_id;
+        int ping_thread_id;
         pthread_t thread_handle;
+        pthread_t ping_thread_handle;
         void * ptcp_socket = nullptr;
         void (*callback_registered)(void *,void *);
         void* callback_class = nullptr;
+        
+        void Register_Callback_Info(void (*callback_function)(void*,void*),void* arg0)
+        {
+            callback_registered = callback_function;
+            thread_id = pthread_create(&thread_handle,0,data_thread_member,this);
+            ping_thread_id = pthread_create(&ping_thread_handle,0,ping_thread_member,this);
+            ptcp_socket = this;
+            callback_class = arg0;
+            pthread_mutex_init(&mutex_ping,NULL);
+            pthread_mutex_init(&mutex_receive,NULL);
+            pthread_mutex_init(&mutex_transmit,NULL);
+            
+        }
+
+        static void* ping_thread_member(void* arg)
+        {
+            TCP_CONNECTION* ptcp_connection = (TCP_CONNECTION*)arg;
+            return ptcp_connection->ping_thread(arg);
+        }
+        void* ping_thread(void *arg)
+        {
+            const char ping_buffer[] = "~^PING\n"; //7e 81 50 49 4e 47 in hex
+            int is_written = -1;
+            while(exit_code!=1)
+            {
+                pthread_mutex_lock(&mutex_ping);
+                is_written = write(socket_fd,ping_buffer,sizeof(ping_buffer));
+                pthread_mutex_unlock(&mutex_ping);
+                
+                if(is_written<0)
+                {
+                    exit_code = 1;
+                }
+                sleep(1);
+            }
+        }
+
         static void* data_thread_member(void* arg)
         {
             TCP_CONNECTION* ptcp_connection = (TCP_CONNECTION*)arg;
@@ -57,30 +148,21 @@ namespace tcp_connection
         }
         void* data_thread(void* arg)
         {
-            char buf[]="ping\r\n";
             int is_written = -1;
             int counter = 0;
+            receive_buffer_length = 0;
             while(exit_code !=1)
             {
-                is_written = write(socket_fd,buf,sizeof(buf));
-                if(is_written<0)
-                {
-                    counter++;
-                }
-                else
-                {
-                    counter = 0;
-                }
-                if(counter>1)
-                {
-                    exit_code = 1;
-                }
-                sleep(1);
+                pthread_mutex_lock(&mutex_receive);
+                pthread_mutex_lock(&mutex_ping);
+                
+                is_written = write(socket_fd,receive_buffer,receive_buffer_length);
+                pthread_mutex_unlock(&mutex_ping);
+                pthread_mutex_unlock(&mutex_receive);
+                usleep(10000);
             }
             exit_code = 2;
-            std::cout<<"exit data thread"<<std::endl;
             callback_registered(callback_class,(void*)this);
-            std::cout<<"exit data thread"<<std::endl;
             pthread_exit(&exit_code);
         }
     };

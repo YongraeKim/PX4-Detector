@@ -1,5 +1,5 @@
 #include "UDP_SOCKET.h"
-
+using namespace std;
 UDP_SOCKET::UDP_SOCKET(const char* ipv4_address,uint16_t port, int32_t buffersize, UDP_SOCKET_TYPE socket_type)
 {
     memset(&_socket_address,0,sizeof(_socket_address));
@@ -26,6 +26,14 @@ int UDP_SOCKET::Create_Socket()
 {
     _socket_fd = socket(AF_INET,SOCK_DGRAM,0);
     _last_error_code = _socket_fd;
+    if(_last_error_code<0)
+    {
+        cout <<"[UDP_ERROR] Failed socket creation"<<endl;
+    }
+    else
+    {
+        cout <<"[UDP_INFO] Socket created"<<endl;
+    }
     return _last_error_code;
 }
 
@@ -34,10 +42,12 @@ bool UDP_SOCKET::Bind()
     _last_error_code = bind(_socket_fd,(struct sockaddr*)&_socket_address,sizeof(_socket_address));
     if(_last_error_code>-1)
     {
+        cout <<"[UDP_INFO] Bind succeeded"<<endl;
         _is_bind = true;
     }
     else
     {
+        cout <<"[UDP_ERROR] Failed binding UDP"<<endl;
         _is_bind = false;
     }
     return _is_bind;
