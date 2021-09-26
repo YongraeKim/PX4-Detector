@@ -82,6 +82,7 @@ int UDP_SOCKET::Write_Data(uint8_t* buffer, int32_t write_size)
     {
         transmitted_size = sendto(_socket_fd,buffer,write_size,0,
                                 (struct sockaddr*)&_socket_address,sizeof(_socket_address)); 
+        
     }    
     return transmitted_size;
 }

@@ -49,10 +49,21 @@ int main()
 
     uint8_t data_from_udp[BUFFER_SIZE] = {0,};
     int32_t data_from_udp_length = -1;
+    uint8_t data_from_tcp[BUFFER_SIZE] = {0,};
+    int32_t data_from_tcp_length = -1;
     while(exit_code != 1)
     {
         data_from_udp_length=udp->Receive_Data(data_from_udp,BUFFER_SIZE);
-        tcp->Receive_Data(data_from_udp,data_from_udp_length);
+        if(data_from_udp_length>0)
+        {
+            tcp->Receive_Data(data_from_udp,data_from_udp_length);
+        }
+        data_from_tcp_length = tcp->Write_Data(data_from_tcp,BUFFER_SIZE);
+        if(data_from_udp_length>0)
+        {
+            udp->Write_Data(data_from_tcp,data_from_tcp_length);
+        }
+        usleep(10000);
     }
     udp->Close_Socket();
     tcp->Close_Socket();

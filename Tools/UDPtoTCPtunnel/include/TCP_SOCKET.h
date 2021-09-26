@@ -71,21 +71,40 @@ namespace tcp_connection
         bool Transmit_UDP_Data(uint8_t* udp_data, int32_t length)
         {
             bool is_valid = false;
-            pthread_mutex_lock(&mutex_receive);
+            pthread_mutex_lock(&mutex_transmit);
             if(length<buffer_size)
             {
-                memcpy(receive_buffer,udp_data,length);
-                receive_buffer_length = length;
+                memcpy(transmit_buffer,udp_data,length);
+                transmit_buffer_length = length;
                 is_valid = true;
             }
             else
             {
-                memcpy(receive_buffer,udp_data,buffer_size);
-                receive_buffer_length = buffer_size;
+                memcpy(transmit_buffer,udp_data,buffer_size);
+                transmit_buffer_length = buffer_size;
                 is_valid = false;
             }
-            pthread_mutex_unlock(&mutex_receive);
+            pthread_mutex_unlock(&mutex_transmit);
             return is_valid;
+        }
+        int Transmit_TCP_Data(uint8_t* tcp_to_udp, int32_t length)
+        {
+            int return_len = receive_buffer_length;
+            if(return_len<=0)
+            {
+                return return_len;
+            }
+            pthread_mutex_lock(&mutex_receive);
+            if(length>receive_buffer_length)
+            {
+                memcpy(tcp_to_udp,receive_buffer,receive_buffer_length);
+            }
+            else
+            {
+                memcpy(tcp_to_udp,receive_buffer,length);
+            }
+            pthread_mutex_unlock(&mutex_receive);
+            return return_len;
         }
     private:
         uint8_t *transmit_buffer = nullptr;
@@ -115,6 +134,10 @@ namespace tcp_connection
             pthread_mutex_init(&mutex_ping,NULL);
             pthread_mutex_init(&mutex_receive,NULL);
             pthread_mutex_init(&mutex_transmit,NULL);
+            //for non-blocking tcp socket
+            int flag;
+            flag = fcntl(socket_fd, F_GETFL, 0 );
+            fcntl(socket_fd, F_SETFL, flag | O_NONBLOCK );
             
         }
 
@@ -153,12 +176,17 @@ namespace tcp_connection
             receive_buffer_length = 0;
             while(exit_code !=1)
             {
-                pthread_mutex_lock(&mutex_receive);
+                pthread_mutex_lock(&mutex_transmit);
                 pthread_mutex_lock(&mutex_ping);
-                
-                is_written = write(socket_fd,receive_buffer,receive_buffer_length);
+                //write received data to tcp client
+                is_written = write(socket_fd,transmit_buffer,transmit_buffer_length);
                 pthread_mutex_unlock(&mutex_ping);
+                pthread_mutex_unlock(&mutex_transmit);    
+
+                pthread_mutex_lock(&mutex_receive);
+                receive_buffer_length = read(socket_fd,receive_buffer,buffer_size);
                 pthread_mutex_unlock(&mutex_receive);
+                
                 usleep(10000);
             }
             exit_code = 2;

@@ -175,7 +175,7 @@ bool TCP_SOCKET::Accept()
         }
         else
         {
-            connection_candidate->Start_Communication(Connection_Callback_Member,this);
+            connection_candidate->Start_Communication(Connection_Callback_Member,this,this->_buffersize);
             _connection.push_back(connection_candidate);
             _is_accept = true;
             cout <<"[TCP_INFO] Connection established to "<<connection_string<<endl;
@@ -203,8 +203,15 @@ int TCP_SOCKET::Receive_Data(uint8_t* buffer, int32_t read_size)
     return -1;
 }
 
-//Receive from TCP client, and transmit outside from TCP_SOCKET
+//Receive from TCP client, and transmit outside from TCP_SOCKET(send to udp socket)
 int TCP_SOCKET::Write_Data(uint8_t* buffer, int32_t write_size)
 {
-    return -1;
+    int length_to_write = -1;
+    vector<tcp_connection::TCP_CONNECTION*>::iterator iter = _connection.begin();
+    for(iter;iter<_connection.end();++iter)
+    {
+        tcp_connection::TCP_CONNECTION* connection = (tcp_connection::TCP_CONNECTION*)*iter;
+        length_to_write = connection->Transmit_TCP_Data(buffer,write_size);
+    }
+    return length_to_write;
 }

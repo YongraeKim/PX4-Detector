@@ -57,6 +57,8 @@ arpa/inet.h
 -
 thread
 -
+fcntl.h
+-
 
 include/TCP_SOCKET.h
 vector

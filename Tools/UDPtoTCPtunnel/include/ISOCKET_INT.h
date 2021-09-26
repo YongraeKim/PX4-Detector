@@ -8,6 +8,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <thread>
+#include <fcntl.h>
 
 #define socket_interface class
 
