@@ -103,6 +103,8 @@ namespace tcp_connection
             {
                 memcpy(tcp_to_udp,receive_buffer,length);
             }
+            receive_buffer_length = 0;
+            memset(receive_buffer,0,buffer_size);
             pthread_mutex_unlock(&mutex_receive);
             return return_len;
         }
@@ -126,6 +128,15 @@ namespace tcp_connection
         
         void Register_Callback_Info(void (*callback_function)(void*,void*),void* arg0)
         {
+
+            //for non-blocking tcp socket
+            int flag;
+            flag = fcntl(socket_fd, F_GETFL, 0 );
+            fcntl(socket_fd, F_SETFL, flag | O_NONBLOCK );
+            // struct timeval tv;
+            // tv.tv_sec = 0;
+            // tv.tv_usec = 10000;
+            // setsockopt(socket_fd, SOL_SOCKET, SO_SNDTIMEO | SO_RCVTIMEO, (const char*)&tv, sizeof(tv));
             callback_registered = callback_function;
             thread_id = pthread_create(&thread_handle,0,data_thread_member,this);
             ping_thread_id = pthread_create(&ping_thread_handle,0,ping_thread_member,this);
@@ -134,10 +145,6 @@ namespace tcp_connection
             pthread_mutex_init(&mutex_ping,NULL);
             pthread_mutex_init(&mutex_receive,NULL);
             pthread_mutex_init(&mutex_transmit,NULL);
-            //for non-blocking tcp socket
-            int flag;
-            flag = fcntl(socket_fd, F_GETFL, 0 );
-            fcntl(socket_fd, F_SETFL, flag | O_NONBLOCK );
             
         }
 
@@ -182,12 +189,12 @@ namespace tcp_connection
                 is_written = write(socket_fd,transmit_buffer,transmit_buffer_length);
                 pthread_mutex_unlock(&mutex_ping);
                 pthread_mutex_unlock(&mutex_transmit);    
+                usleep(1000);
 
                 pthread_mutex_lock(&mutex_receive);
                 receive_buffer_length = read(socket_fd,receive_buffer,buffer_size);
                 pthread_mutex_unlock(&mutex_receive);
-                
-                usleep(10000);
+                usleep(1000);
             }
             exit_code = 2;
             callback_registered(callback_class,(void*)this);

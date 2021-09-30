@@ -39,10 +39,12 @@ int UDP_SOCKET::Create_Socket()
 
 bool UDP_SOCKET::Bind()
 {
+
     _last_error_code = bind(_socket_fd,(struct sockaddr*)&_socket_address,sizeof(_socket_address));
     if(_last_error_code>-1)
     {
         cout <<"[UDP_INFO] Bind succeeded"<<endl;
+        
         _is_bind = true;
     }
     else
@@ -80,8 +82,22 @@ int UDP_SOCKET::Write_Data(uint8_t* buffer, int32_t write_size)
     int transmitted_size = -1;
     if(_is_bind)
     {
-        transmitted_size = sendto(_socket_fd,buffer,write_size,0,
-                                (struct sockaddr*)&_socket_address,sizeof(_socket_address)); 
+        if(write_size>0)
+        {
+            transmitted_size = sendto(_socket_fd,buffer,write_size,0,
+                                    (struct sockaddr*)&_socket_address,sizeof(_socket_address)); 
+            if(transmitted_size>0)
+            {
+                for(int i=0;i<write_size;i++)
+                {
+                    printf("%x ",buffer[i]);
+                }
+                printf("\r\n");
+
+            }
+            else cout <<"error transmit udp"<<endl;
+
+        }
         
     }    
     return transmitted_size;

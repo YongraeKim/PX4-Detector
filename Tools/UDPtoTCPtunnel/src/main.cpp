@@ -11,7 +11,7 @@
 using namespace std;
 
 #define UDP_PORT 14550
-#define BUFFER_SIZE 4096
+#define BUFFER_SIZE 16384
 #define SOCKFD_EMPTY -1
 
 UDP_SOCKET* udp_exit = nullptr;
@@ -54,16 +54,17 @@ int main()
     while(exit_code != 1)
     {
         data_from_udp_length=udp->Receive_Data(data_from_udp,BUFFER_SIZE);
+        usleep(1000);
         if(data_from_udp_length>0)
         {
             tcp->Receive_Data(data_from_udp,data_from_udp_length);
         }
         data_from_tcp_length = tcp->Write_Data(data_from_tcp,BUFFER_SIZE);
-        if(data_from_udp_length>0)
+        usleep(1000);
+        if(data_from_tcp_length>0)
         {
             udp->Write_Data(data_from_tcp,data_from_tcp_length);
         }
-        usleep(10000);
     }
     udp->Close_Socket();
     tcp->Close_Socket();
