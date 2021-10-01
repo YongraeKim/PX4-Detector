@@ -123,6 +123,33 @@ udp2tcp/fast:
 	$(MAKE) -f CMakeFiles/udp2tcp.dir/build.make CMakeFiles/udp2tcp.dir/build
 .PHONY : udp2tcp/fast
 
+src/TCP_CONNECTION.o: src/TCP_CONNECTION.cpp.o
+
+.PHONY : src/TCP_CONNECTION.o
+
+# target to build an object file
+src/TCP_CONNECTION.cpp.o:
+	$(MAKE) -f CMakeFiles/udp2tcp.dir/build.make CMakeFiles/udp2tcp.dir/src/TCP_CONNECTION.cpp.o
+.PHONY : src/TCP_CONNECTION.cpp.o
+
+src/TCP_CONNECTION.i: src/TCP_CONNECTION.cpp.i
+
+.PHONY : src/TCP_CONNECTION.i
+
+# target to preprocess a source file
+src/TCP_CONNECTION.cpp.i:
+	$(MAKE) -f CMakeFiles/udp2tcp.dir/build.make CMakeFiles/udp2tcp.dir/src/TCP_CONNECTION.cpp.i
+.PHONY : src/TCP_CONNECTION.cpp.i
+
+src/TCP_CONNECTION.s: src/TCP_CONNECTION.cpp.s
+
+.PHONY : src/TCP_CONNECTION.s
+
+# target to generate assembly for a file
+src/TCP_CONNECTION.cpp.s:
+	$(MAKE) -f CMakeFiles/udp2tcp.dir/build.make CMakeFiles/udp2tcp.dir/src/TCP_CONNECTION.cpp.s
+.PHONY : src/TCP_CONNECTION.cpp.s
+
 src/TCP_SOCKET.o: src/TCP_SOCKET.cpp.o
 
 .PHONY : src/TCP_SOCKET.o
@@ -213,6 +240,9 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... udp2tcp"
 	@echo "... edit_cache"
+	@echo "... src/TCP_CONNECTION.o"
+	@echo "... src/TCP_CONNECTION.i"
+	@echo "... src/TCP_CONNECTION.s"
 	@echo "... src/TCP_SOCKET.o"
 	@echo "... src/TCP_SOCKET.i"
 	@echo "... src/TCP_SOCKET.s"

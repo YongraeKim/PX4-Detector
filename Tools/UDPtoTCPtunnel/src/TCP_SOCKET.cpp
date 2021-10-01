@@ -3,7 +3,7 @@
 #include <algorithm>
 
 using namespace std;
-
+using namespace tcp_connection;
 TCP_SOCKET::TCP_SOCKET(const char *ipv4_address, int32_t port, int32_t buffersize, TCP_SOCKET_TYPE socket_type)
 {
     Initialize(ipv4_address,port,buffersize,socket_type);
@@ -115,9 +115,9 @@ void TCP_SOCKET::Connection_Callback_Member(void* class_ptr, void* connection_pt
 
 void TCP_SOCKET::Connection_Callback(void* pconnection_arg)
 {
-    tcp_connection::TCP_CONNECTION *connection_registered = (tcp_connection::TCP_CONNECTION *)pconnection_arg;
+    TCP_CONNECTION *connection_registered = (TCP_CONNECTION *)pconnection_arg;
     connection_registered->End_Communication();
-    vector<tcp_connection::TCP_CONNECTION*>::iterator iter = find_if(_connection.begin(),_connection.end(),[&](tcp_connection::TCP_CONNECTION* ptr_elem){return ptr_elem==connection_registered;});
+    vector<TCP_CONNECTION*>::iterator iter = find_if(_connection.begin(),_connection.end(),[&](TCP_CONNECTION* ptr_elem){return ptr_elem==connection_registered;});
     if(iter!=_connection.end())
     {
         _connection.erase(iter);
@@ -146,7 +146,7 @@ bool TCP_SOCKET::Accept()
     cout <<"[TCP_INFO] Wait for accept clinets..."<<endl;
     _socket_cs = accept(_socket_fd,(struct sockaddr*)&_socket_cs_address,&_socket_address_cs_length);
     cout <<"[TCP_INFO] Detect accessing to server..."<<endl;
-    tcp_connection::TCP_CONNECTION *connection_candidate = new tcp_connection::TCP_CONNECTION;
+    TCP_CONNECTION *connection_candidate = new TCP_CONNECTION;
     connection_candidate->address = _socket_cs_address;
     connection_candidate->socket_fd = _socket_cs;
     char connection_string[INET_ADDRSTRLEN];
@@ -164,7 +164,7 @@ bool TCP_SOCKET::Accept()
     }
     if(_connection.size()<_max_connection_number && _is_accept == true)
     {
-        vector<tcp_connection::TCP_CONNECTION*>::iterator iter = find_if(_connection.begin(),_connection.end(),[&](tcp_connection::TCP_CONNECTION* ptr_elem){return ptr_elem==connection_candidate;});
+        vector<TCP_CONNECTION*>::iterator iter = find_if(_connection.begin(),_connection.end(),[&](TCP_CONNECTION* ptr_elem){return ptr_elem==connection_candidate;});
         
         if(iter != _connection.end())
         {
@@ -194,24 +194,46 @@ bool TCP_SOCKET::Accept()
 //Receive outside from TCP_SOCKET, and transmit to TCP client
 int TCP_SOCKET::Receive_Data(uint8_t* buffer, int32_t read_size)
 {
-    vector<tcp_connection::TCP_CONNECTION*>::iterator iter = _connection.begin();
+    vector<TCP_CONNECTION*>::iterator iter = _connection.begin();
     for(iter;iter<_connection.end();++iter)
     {
-        tcp_connection::TCP_CONNECTION* connection = (tcp_connection::TCP_CONNECTION*)*iter;
+        TCP_CONNECTION* connection = (TCP_CONNECTION*)*iter;
         connection->Transmit_UDP_Data(buffer,read_size);
     }
     return -1;
+}
+
+int TCP_SOCKET::Receive_Data(std::queue<BUFFER_DATA> &queue_data)
+{
+    vector<TCP_CONNECTION*>::iterator iter = _connection.begin();
+    for(iter;iter<_connection.end();iter++)
+    {
+        TCP_CONNECTION* connection = (TCP_CONNECTION*)*iter;
+        connection->Transmit_UDP_Data(queue_data);
+    }
 }
 
 //Receive from TCP client, and transmit outside from TCP_SOCKET(send to udp socket)
 int TCP_SOCKET::Write_Data(uint8_t* buffer, int32_t write_size)
 {
     int length_to_write = -1;
-    vector<tcp_connection::TCP_CONNECTION*>::iterator iter = _connection.begin();
+    vector<TCP_CONNECTION*>::iterator iter = _connection.begin();
     for(iter;iter<_connection.end();++iter)
     {
-        tcp_connection::TCP_CONNECTION* connection = (tcp_connection::TCP_CONNECTION*)*iter;
+        TCP_CONNECTION* connection = (TCP_CONNECTION*)*iter;
         length_to_write = connection->Transmit_TCP_Data(buffer,write_size);
+    }
+    return length_to_write;
+}
+
+int TCP_SOCKET::Write_Data(std::queue<BUFFER_DATA> &queue_data)
+{
+    int length_to_write = 0;
+    vector<TCP_CONNECTION*>::iterator iter = _connection.begin();
+    for(iter;iter<_connection.end();iter++)
+    {
+        TCP_CONNECTION* connection = (TCP_CONNECTION*)*iter;
+        length_to_write = length_to_write + connection->Transmit_TCP_Data(queue_data);
     }
     return length_to_write;
 }

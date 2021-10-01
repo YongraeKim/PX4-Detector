@@ -9,8 +9,15 @@
 #include <arpa/inet.h>
 #include <thread>
 #include <fcntl.h>
+#include <queue>
 
 #define socket_interface class
+
+struct BUFFER_DATA
+{
+    uint8_t *buffer;
+    int32_t length;
+};
 
 socket_interface ISOCKET_INT
 {
@@ -20,7 +27,11 @@ public:
     virtual bool Accept(){return false;};
     virtual bool Listen(){return false;};
     virtual int Receive_Data(uint8_t* buffer, int32_t read_size){return -1;};
+    virtual int Receive_Data(std::queue<BUFFER_DATA> &receive_data){return -1;};
+    virtual int Receive_Data(){return -1;};
     virtual int Write_Data(uint8_t* buffer, int32_t write_size){return -1;};
+    virtual int Write_Data(std::queue<BUFFER_DATA> &write_data){return -1;};
+    virtual int Write_Data(){return -1;}
     virtual void Close_Socket(){};
     virtual void* Connection_Thread(void *arg){};
 

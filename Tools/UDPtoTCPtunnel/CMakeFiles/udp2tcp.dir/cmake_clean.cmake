@@ -2,6 +2,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/udp2tcp.dir/src/main.cpp.o"
   "CMakeFiles/udp2tcp.dir/src/UDP_SOCKET.cpp.o"
   "CMakeFiles/udp2tcp.dir/src/TCP_SOCKET.cpp.o"
+  "CMakeFiles/udp2tcp.dir/src/TCP_CONNECTION.cpp.o"
   "udp2tcp.pdb"
   "udp2tcp"
 )

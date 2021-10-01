@@ -53,17 +53,30 @@ int main()
     int32_t data_from_tcp_length = -1;
     while(exit_code != 1)
     {
-        data_from_udp_length=udp->Receive_Data(data_from_udp,BUFFER_SIZE);
+        // data_from_udp_length=udp->Receive_Data(data_from_udp,BUFFER_SIZE);
+        // usleep(1000);
+        // if(data_from_udp_length>0)
+        // {
+        //     tcp->Receive_Data(data_from_udp,data_from_udp_length);
+        // }
+        // data_from_tcp_length = tcp->Write_Data(data_from_tcp,BUFFER_SIZE);
+        // usleep(1000);
+        // if(data_from_tcp_length>0)
+        // {
+        //     udp->Write_Data(data_from_tcp,data_from_tcp_length);
+        // }
+
+        data_from_udp_length=udp->Receive_Data();
         usleep(1000);
         if(data_from_udp_length>0)
         {
-            tcp->Receive_Data(data_from_udp,data_from_udp_length);
+            tcp->Receive_Data(udp->receive_queue);
         }
-        data_from_tcp_length = tcp->Write_Data(data_from_tcp,BUFFER_SIZE);
+        data_from_tcp_length = tcp->Write_Data(udp->transmit_queue);
         usleep(1000);
         if(data_from_tcp_length>0)
         {
-            udp->Write_Data(data_from_tcp,data_from_tcp_length);
+            udp->Write_Data();
         }
     }
     udp->Close_Socket();

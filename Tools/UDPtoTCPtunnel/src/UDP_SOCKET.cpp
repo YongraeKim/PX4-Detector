@@ -77,6 +77,51 @@ int UDP_SOCKET::Receive_Data(uint8_t* buffer, int32_t read_size)
     }
     return received_size;
 }
+
+int UDP_SOCKET::Receive_Data(std::queue<BUFFER_DATA> &receive_data)
+{
+    int received_size = -1;
+    if(_is_bind)
+    {
+        received_size = recvfrom(_socket_fd,
+                                    _received_buffer,
+                                    _buffersize,0,
+                                    (struct sockaddr*)&_socket_address,
+                                    &_socket_address_length);
+        if(received_size>0)
+        {
+            BUFFER_DATA data;
+            data.length = received_size;
+            data.buffer = new uint8_t[data.length];
+            memcpy(data.buffer,_received_buffer,data.length);
+            receive_data.push(data);
+        }
+    }
+    return received_size;
+}
+
+int UDP_SOCKET::Receive_Data()
+{
+    int received_size = -1;
+    if(_is_bind)
+    {
+        received_size = recvfrom(_socket_fd,
+                                    _received_buffer,
+                                    _buffersize,0,
+                                    (struct sockaddr*)&_socket_address,
+                                    &_socket_address_length);
+        if(received_size>0)
+        {
+            BUFFER_DATA data;
+            data.length = received_size;
+            data.buffer = new uint8_t[data.length];
+            memcpy(data.buffer,_received_buffer,data.length);
+            receive_queue.push(data);
+        }
+    }
+    return received_size;
+}
+
 int UDP_SOCKET::Write_Data(uint8_t* buffer, int32_t write_size)
 {
     int transmitted_size = -1;
@@ -86,21 +131,54 @@ int UDP_SOCKET::Write_Data(uint8_t* buffer, int32_t write_size)
         {
             transmitted_size = sendto(_socket_fd,buffer,write_size,0,
                                     (struct sockaddr*)&_socket_address,sizeof(_socket_address)); 
-            if(transmitted_size>0)
-            {
-                for(int i=0;i<write_size;i++)
-                {
-                    printf("%x ",buffer[i]);
-                }
-                printf("\r\n");
-
-            }
-            else cout <<"error transmit udp"<<endl;
-
         }
-        
     }    
     return transmitted_size;
+}
+
+int UDP_SOCKET::Write_Data(std::queue<BUFFER_DATA> &write_data)
+{
+    int transmitted_size = -1;
+    if(_is_bind)
+    {
+        while(!write_data.empty())
+        {
+            BUFFER_DATA data = write_data.front();
+            if(data.length>0)
+            {
+                transmitted_size=sendto(_socket_fd,data.buffer,data.length,0,
+                                    (struct sockaddr*)&_socket_address,sizeof(_socket_address)); 
+            }
+            write_data.pop();
+        }
+    }
+    return transmitted_size;
+}
+
+int UDP_SOCKET::Write_Data()
+{
+    int transmitted_size = 0;
+    int transmitted_size_temp = 0;
+    if(_is_bind)
+    {
+        while(!transmit_queue.empty())
+        {
+            BUFFER_DATA data = transmit_queue.front();
+            if(data.length>0)
+            {
+                transmitted_size_temp=sendto(_socket_fd,data.buffer,data.length,0,
+                                    (struct sockaddr*)&_socket_address,sizeof(_socket_address)); 
+            }
+            delete data.buffer;
+            transmit_queue.pop();
+        }
+        transmitted_size = transmitted_size+transmitted_size_temp;
+    }
+    else
+    {
+        transmitted_size = -1;
+        return -1;
+    }
 }
 
 void UDP_SOCKET::Close_Socket()

@@ -13,5 +13,5 @@ link_libraries(
   ${Boost_TIMER_LIBRARY_RELEASE}
 )
 
-add_executable(udp2tcp src/main.cpp src/UDP_SOCKET.cpp src/TCP_SOCKET.cpp)
+add_executable(udp2tcp src/main.cpp src/UDP_SOCKET.cpp src/TCP_SOCKET.cpp src/TCP_CONNECTION.cpp)
 target_link_libraries (udp2tcp ${CMAKE_THREAD_LIBS_INIT})
