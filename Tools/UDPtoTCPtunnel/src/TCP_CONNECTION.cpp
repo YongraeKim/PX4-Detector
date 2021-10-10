@@ -117,6 +117,12 @@ namespace tcp_connection
                 BUFFER_DATA data = transmit_queue.front();
                 queue_tcp_data.push(data);
                 data_length = data_length+data.length;
+                std::cout <<"[TCP] Rx Data : ";
+                for(int i=0;i<data.length;i++)
+                {
+                    printf("%x ",data.buffer[i]);
+                }
+                printf("\r\n");
                 transmit_queue.pop();
             }
             return data_length;
