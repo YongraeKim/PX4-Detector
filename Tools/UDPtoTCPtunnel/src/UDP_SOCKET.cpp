@@ -136,6 +136,7 @@ int UDP_SOCKET::Write_Data(uint8_t* buffer, int32_t write_size)
     return transmitted_size;
 }
 
+
 int UDP_SOCKET::Write_Data(std::queue<BUFFER_DATA> &write_data)
 {
     int transmitted_size = -1;
@@ -168,6 +169,12 @@ int UDP_SOCKET::Write_Data()
             {
                 transmitted_size_temp=sendto(_socket_fd,data.buffer,data.length,0,
                                     (struct sockaddr*)&_socket_address,sizeof(_socket_address)); 
+                cout<<"[UDP] Tx Data : ";
+                for(int i=0;i<data.length;i++)
+                {
+                    printf("%x ",data.buffer[i]);
+                }
+                printf("\r\n");
             }
             delete data.buffer;
             transmit_queue.pop();
