@@ -7,6 +7,17 @@ namespace tcp_connection
         TCP_CONNECTION::TCP_CONNECTION(){};
         TCP_CONNECTION::~TCP_CONNECTION()
         {
+            while(!receive_queue.empty())
+            {
+                delete receive_queue.front().buffer;
+                receive_queue.pop();
+            }
+            while(!transmit_queue.empty())
+            {
+                delete transmit_queue.front().buffer;
+                transmit_queue.pop();
+            }
+            
             if(transmit_buffer!=nullptr)
             {
                 delete transmit_buffer;
@@ -152,7 +163,7 @@ namespace tcp_connection
                 {
                     exit_code = 1;
                 }
-                sleep(1);
+                usleep(100000);
             }
         }
 
