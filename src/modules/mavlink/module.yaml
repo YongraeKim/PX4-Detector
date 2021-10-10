@@ -40,6 +40,7 @@ parameters:
                 #6: Iridium # as the user does not need to configure this, hide it from the UI
                 7: Minimal
                 8: External Vision
+                9: Web
             reboot_required: true
             num_instances: *max_num_config_instances
             default: [0, 2, 0]
@@ -53,7 +54,7 @@ parameters:
                     each stream is automatically decreased.
 
                     If this is set to 0 a value of half of the theoretical maximum bandwidth is used.
-                    This corresponds to baudrate/20 Bytes/s (baudrate/10 = maximum data rate on 
+                    This corresponds to baudrate/20 Bytes/s (baudrate/10 = maximum data rate on
                     8N1-configured links).
 
             type: int32

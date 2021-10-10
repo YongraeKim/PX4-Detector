@@ -193,6 +193,7 @@ public:
 		MAVLINK_MODE_MINIMAL,
 		MAVLINK_MODE_EXTVISION,
 		MAVLINK_MODE_EXTVISIONMIN,
+		MAVLINK_MODE_WEB,
 
 		MAVLINK_MODE_COUNT
 	};
@@ -241,7 +242,8 @@ public:
 
 		case MAVLINK_MODE_EXTVISIONMIN:
 			return "ExtVisionMin";
-
+		case MAVLINK_MODE_WEB:
+			return "Web";
 		default:
 			return "Unknown";
 		}
@@ -573,8 +575,8 @@ private:
 
 	volatile bool		_mavlink_ulog_stop_requested{false};
 
-	MAVLINK_MODE 		_mode{MAVLINK_MODE_NORMAL};
-
+//	MAVLINK_MODE 		_mode{MAVLINK_MODE_NORMAL};
+	MAVLINK_MODE 		_mode{MAVLINK_MODE_WEB};
 	mavlink_channel_t	_channel{MAVLINK_COMM_0};
 
 	ringbuffer::RingBuffer	_logbuffer{5, sizeof(mavlink_log_s)};

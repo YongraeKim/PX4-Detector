@@ -1,6 +1,6 @@
 #pragma once
 #include "ISOCKET_INT.h"
-
+#include "MAVLINK.hpp"
 namespace tcp_connection
 {
     class TCP_CONNECTION

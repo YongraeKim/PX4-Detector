@@ -68,9 +68,13 @@ fcntl.h
 queue
 -
 
+include/MAVLINK.hpp
+
 include/TCP_CONNECTION.h
 ISOCKET_INT.h
 include/ISOCKET_INT.h
+MAVLINK.hpp
+include/MAVLINK.hpp
 
 include/TCP_SOCKET.h
 vector

@@ -3,10 +3,12 @@
 
 CMakeFiles/udp2tcp.dir/src/TCP_CONNECTION.cpp.o: src/TCP_CONNECTION.cpp
 CMakeFiles/udp2tcp.dir/src/TCP_CONNECTION.cpp.o: include/ISOCKET_INT.h
+CMakeFiles/udp2tcp.dir/src/TCP_CONNECTION.cpp.o: include/MAVLINK.hpp
 CMakeFiles/udp2tcp.dir/src/TCP_CONNECTION.cpp.o: include/TCP_CONNECTION.h
 
 CMakeFiles/udp2tcp.dir/src/TCP_SOCKET.cpp.o: src/TCP_SOCKET.cpp
 CMakeFiles/udp2tcp.dir/src/TCP_SOCKET.cpp.o: include/ISOCKET_INT.h
+CMakeFiles/udp2tcp.dir/src/TCP_SOCKET.cpp.o: include/MAVLINK.hpp
 CMakeFiles/udp2tcp.dir/src/TCP_SOCKET.cpp.o: include/TCP_CONNECTION.h
 CMakeFiles/udp2tcp.dir/src/TCP_SOCKET.cpp.o: include/TCP_SOCKET.h
 
@@ -16,6 +18,7 @@ CMakeFiles/udp2tcp.dir/src/UDP_SOCKET.cpp.o: include/UDP_SOCKET.h
 
 CMakeFiles/udp2tcp.dir/src/main.cpp.o: src/main.cpp
 CMakeFiles/udp2tcp.dir/src/main.cpp.o: include/ISOCKET_INT.h
+CMakeFiles/udp2tcp.dir/src/main.cpp.o: include/MAVLINK.hpp
 CMakeFiles/udp2tcp.dir/src/main.cpp.o: include/TCP_CONNECTION.h
 CMakeFiles/udp2tcp.dir/src/main.cpp.o: include/TCP_SOCKET.h
 CMakeFiles/udp2tcp.dir/src/main.cpp.o: include/UDP_SOCKET.h
