@@ -32,9 +32,11 @@ This instruction is only valid in WSL1.
 >cd ~/PX4-Swon
 
 7. build PX4 with
->make px4_sitl_default gazebo_iris
+>HEADLESS=1 make px4_sitl_default gazebo_iris
 >>if this doesn't work,
->>>sudo make px4_sitl_default gazebo_iris
+>>>sudo HEADLESS=1 make px4_sitl_default gazebo_iris  
+>>or  
+>>>HEADLESS=1 make px4_sitl_default gazebo_iris
 
 
 # UDP to TCP tunneling
