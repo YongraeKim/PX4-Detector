@@ -496,6 +496,7 @@ void MavlinkReceiver::handle_message_command_both(mavlink_message_t *msg, const 
 
 	if (!target_ok) {
 		acknowledge(msg->sysid, msg->compid, cmd_mavlink.command, vehicle_command_ack_s::VEHICLE_RESULT_FAILED);
+		PX4_INFO("Target system mismatched");
 		return;
 	}
 
@@ -1631,6 +1632,7 @@ MavlinkReceiver::handle_message_ping(mavlink_message_t *msg)
 
 			_ping_pub.publish(uorb_ping_msg);
 		}
+
 	}
 }
 
