@@ -68,7 +68,7 @@ INFO  [mavlink] msgid : 75 -> **COMMAND_INT #75**
 INFO  [mavlink] =========payloads=========
 INFO  [mavlink] target_system : 1
 INFO  [mavlink] target_component : 1
-INFO  [mavlink] frame : 0 -> **Coordinate system defined in MAV_FRAME. See [MAV_FRAME](https://mavlink.io/en/messages/common.html#MAV_FRAME)**
+INFO  [mavlink] frame : 0 -> **Coordinate system defined in MAV_FRAME. See [MAV_FRAME](https://mavlink.io/en/messages/common.html#MAV_FRAME).(In this example, set 0 to be LLA frame)**
 INFO  [mavlink] command : 192 -> **MAV_CMD_DO_REPOSITION #192 in MAV_CMD. See [MAV_CMD](https://mavlink.io/en/messages/common.html#MAV_CMD)**
 INFO  [mavlink] current : 0 -> **Reserved. Set 0**
 INFO  [mavlink] autocontinue : 0 -> **Reserved. Set 0**
@@ -113,3 +113,27 @@ INFO  [mavlink] *********************************************
 >>>>PX4_CUSTOM_SUB_MODE_AUTO_RTGS = 7
 >>>>PX4_CUSTOM_SUB_MODE_AUTO_FOLLOW_TARGET = 8
 >>>>PX4_CUSTOM_SUB_MODE_AUTO_PRECLAND = 8
+
+
+INFO  [mavlink] *********************************************
+INFO  [mavlink] Message Info for handle_message_set_mode
+INFO  [mavlink] magic : 253
+INFO  [mavlink] len : 6
+INFO  [mavlink] incompat_flags : 0
+INFO  [mavlink] compat_flags : 0
+INFO  [mavlink] seq : 37
+INFO  [mavlink] source_system(sysid) : 255
+INFO  [mavlink] source_compoment(compid) : 190
+INFO  [mavlink] msgid : 11 -> **SET_MODE**(deprecated but used in QGC still)
+INFO  [mavlink] =========payloads=========
+INFO  [mavlink] custom_mode : 100925440 ->**which will be decomposited to base_mode, custom_main_mode, and custom_set_mode by bit shifting(in this example, 0x0604xxxx : 0x04(main_mode),0x06(sub_mode)**
+INFO  [mavlink] target_system : 1
+INFO  [mavlink] base_mode : 157
+INFO  [mavlink] custom_main_mode : 4 -> **PX4_CUSTOM_MAIN_MODE_AUTO in PX4**
+INFO  [mavlink] custom_sub_mode : 6 -> **PX4_CUSTOM_SUB_MODE_AUTO_LAND in PX4**
+INFO  [mavlink] =========custom mode comparison========= **(for debugging)**
+INFO  [mavlink] from message, main_mode : 4
+INFO  [mavlink] from message, sub_mode : 6
+INFO  [mavlink] from parsed, main_mode : 4
+INFO  [mavlink] from parsed, sub_mode : 6
+INFO  [mavlink] *********************************************
