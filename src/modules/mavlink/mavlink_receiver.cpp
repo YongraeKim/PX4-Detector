@@ -558,6 +558,8 @@ void MavlinkReceiver::handle_message_command_both(mavlink_message_t *msg, const 
 
 		if (!send_ack) {
 			_cmd_pub.publish(vehicle_command);
+			PX4_INFO("Command published at mavlink_received");
+
 		}
 	}
 
