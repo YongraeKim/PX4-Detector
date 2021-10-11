@@ -6,10 +6,11 @@
 #
 
 set VEHICLE_TYPE mc
+param set NAV_ACC_RAD 2
+param set NAV_DLL_ACT 0
 
 if [ $AUTOCNF = yes ]
 then
-	param set NAV_ACC_RAD 2
 
 	param set RTL_RETURN_ALT 30
 	param set RTL_DESCEND_ALT 10
