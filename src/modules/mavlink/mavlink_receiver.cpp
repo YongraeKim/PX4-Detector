@@ -1991,7 +1991,24 @@ MavlinkReceiver::handle_message_heartbeat(mavlink_message_t *msg)
 	if (_mavlink->get_channel() < (mavlink_channel_t)ORB_MULTI_MAX_INSTANCES) {
 		mavlink_heartbeat_t hb;
 		mavlink_msg_heartbeat_decode(msg, &hb);
-
+		PX4_INFO("*********************************************");
+		PX4_INFO("Message Info for handle_message_heartbeat");
+		PX4_INFO("magic : %d", msg->magic);
+		PX4_INFO("len : %d", msg->len);
+		PX4_INFO("incompat_flags : %d", msg->incompat_flags);
+		PX4_INFO("compat_flags : %d", msg->compat_flags);
+		PX4_INFO("seq : %d", msg->seq);
+		PX4_INFO("source_system(sysid) : %d",(int)msg->sysid);
+		PX4_INFO("source_compoment(compid) : %d",(int)msg->compid);
+		PX4_INFO("msgid : %d",(int)msg->msgid);
+		PX4_INFO("=========payloads(not sure)=========");
+		PX4_INFO("custom_mode : %d",hb.custom_mode);
+		PX4_INFO("type : %d",hb.type);
+		PX4_INFO("autopilot : %d",hb.autopilot);
+		PX4_INFO("base_mode : %d",hb.base_mode);
+		PX4_INFO("system_status : %d",hb.system_status);
+		PX4_INFO("mavlink_version : %d",hb.mavlink_version);
+		PX4_INFO("*********************************************");
 		/* Accept only heartbeats from GCS or ONBOARD Controller, skip heartbeats from other vehicles */
 		if ((msg->sysid != mavlink_system.sysid && hb.type == MAV_TYPE_GCS) || (msg->sysid == mavlink_system.sysid
 				&& hb.type == MAV_TYPE_ONBOARD_CONTROLLER)) {
@@ -2007,7 +2024,6 @@ MavlinkReceiver::handle_message_heartbeat(mavlink_message_t *msg)
 			tstatus.remote_type = hb.type;
 			tstatus.remote_system_status = hb.system_status;
 		}
-
 	}
 }
 

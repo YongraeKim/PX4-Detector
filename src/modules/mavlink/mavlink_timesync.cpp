@@ -156,20 +156,7 @@ MavlinkTimesync::handle_message(const mavlink_message_t *msg)
 
 			mavlink_system_time_t time;
 			mavlink_msg_system_time_decode(msg, &time);
-			PX4_INFO("*********************************************");
-			PX4_INFO("Message Info for handle_message_command_long");
-			PX4_INFO("magic : %d", msg->magic);
-			PX4_INFO("len : %d", msg->len);
-			PX4_INFO("incompat_flags : %d", msg->incompat_flags);
-			PX4_INFO("compat_flags : %d", msg->compat_flags);
-			PX4_INFO("seq : %d", msg->seq);
-			PX4_INFO("source_system(sysid) : %d",(int)msg->sysid);
-			PX4_INFO("source_compoment(compid) : %d",(int)msg->compid);
-			PX4_INFO("msgid : %d",(int)msg->msgid);
-			PX4_INFO("=========payloads(not sure)=========");
-			PX4_INFO("time_unix_usec : %ld",time.time_unix_usec);
-			PX4_INFO("time_boot_ms : %d",time.time_boot_ms);
-			PX4_INFO("*********************************************");
+
 			timespec tv = {};
 			px4_clock_gettime(CLOCK_REALTIME, &tv);
 
