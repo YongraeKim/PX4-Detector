@@ -104,7 +104,6 @@ MavlinkReceiver::acknowledge(uint8_t sysid, uint8_t compid, uint16_t command, ui
 void
 MavlinkReceiver::handle_message(mavlink_message_t *msg)
 {
-//	PX4_INFO("%d",(int)msg->msgid);
 	switch (msg->msgid) {
 	case MAVLINK_MSG_ID_COMMAND_LONG:
 		handle_message_command_long(msg);
@@ -403,6 +402,29 @@ MavlinkReceiver::handle_message_command_long(mavlink_message_t *msg)
 	vcmd.source_component = msg->compid;
 	vcmd.confirmation = cmd_mavlink.confirmation;
 	vcmd.from_external = true;
+	PX4_INFO("*********************************************");
+	PX4_INFO("Message Info for handle_message_command_long");
+	PX4_INFO("magic : %d", msg->magic);
+	PX4_INFO("len : %d", msg->len);
+	PX4_INFO("incompat_flags : %d", msg->incompat_flags);
+	PX4_INFO("compat_flags : %d", msg->compat_flags);
+	PX4_INFO("seq : %d", msg->seq);
+	PX4_INFO("source_system(sysid) : %d",(int)msg->sysid);
+	PX4_INFO("source_compoment(compid) : %d",(int)msg->compid);
+	PX4_INFO("msgid : %d",(int)msg->msgid);
+	PX4_INFO("=========payloads=========");
+	PX4_INFO("target_system : %d",(int)cmd_mavlink.target_system);
+	PX4_INFO("target_component : %d",(int)cmd_mavlink.target_component);
+	PX4_INFO("command : %d",(int)cmd_mavlink.command);
+	PX4_INFO("confirmation : %d",(int)cmd_mavlink.confirmation);
+	PX4_INFO("param1 : %lf",(double)cmd_mavlink.param1);
+	PX4_INFO("param2 : %lf",(double)cmd_mavlink.param2);
+	PX4_INFO("param3 : %lf",(double)cmd_mavlink.param3);
+	PX4_INFO("param4 : %lf",(double)cmd_mavlink.param4);
+	PX4_INFO("param5 : %lf",(double)cmd_mavlink.param5);
+	PX4_INFO("param6 : %lf",(double)cmd_mavlink.param6);
+	PX4_INFO("param7 : %lf",(double)cmd_mavlink.param7);
+	PX4_INFO("*********************************************");
 
 	handle_message_command_both(msg, cmd_mavlink, vcmd);
 }
@@ -432,6 +454,33 @@ MavlinkReceiver::handle_message_command_int(mavlink_message_t *msg)
 	vcmd.source_component = msg->compid;
 	vcmd.confirmation = false;
 	vcmd.from_external = true;
+	PX4_INFO("*********************************************");
+	PX4_INFO("Message Info for handle_message_command_int");
+	PX4_INFO("magic : %d", msg->magic);
+	PX4_INFO("len : %d", msg->len);
+	PX4_INFO("incompat_flags : %d", msg->incompat_flags);
+	PX4_INFO("compat_flags : %d", msg->compat_flags);
+	PX4_INFO("seq : %d", msg->seq);
+	PX4_INFO("source_system(sysid) : %d",(int)msg->sysid);
+	PX4_INFO("source_compoment(compid) : %d",(int)msg->compid);
+	PX4_INFO("msgid : %d",(int)msg->msgid);
+	PX4_INFO("=========payloads=========");
+	PX4_INFO("target_system : %d",(int)cmd_mavlink.target_system);
+	PX4_INFO("target_component : %d",(int)cmd_mavlink.target_component);
+	PX4_INFO("frame : %d",(int)cmd_mavlink.frame);
+	PX4_INFO("command : %d",(int)cmd_mavlink.command);
+	PX4_INFO("current : %d",(int)cmd_mavlink.current);
+	PX4_INFO("autocontinue : %d",(int)cmd_mavlink.autocontinue);
+	PX4_INFO("param1 : %lf",(double)cmd_mavlink.param1);
+	PX4_INFO("param2 : %lf",(double)cmd_mavlink.param2);
+	PX4_INFO("param3 : %lf",(double)cmd_mavlink.param3);
+	PX4_INFO("param4 : %lf",(double)cmd_mavlink.param4);
+	PX4_INFO("x : %d",(int)cmd_mavlink.x);
+	PX4_INFO("y : %d",(int)cmd_mavlink.y);
+	PX4_INFO("z : %d",(int)cmd_mavlink.z);
+	PX4_INFO("*********************************************");
+	PX4_INFO(" ");
+
 
 	handle_message_command_both(msg, cmd_mavlink, vcmd);
 }
@@ -663,6 +712,31 @@ MavlinkReceiver::handle_message_set_mode(mavlink_message_t *msg)
 	vcmd.source_component = msg->compid;
 	vcmd.confirmation = true;
 	vcmd.from_external = true;
+
+	PX4_INFO("*********************************************");
+	PX4_INFO("Message Info for handle_message_set_mode");
+	PX4_INFO("magic : %d", msg->magic);
+	PX4_INFO("len : %d", msg->len);
+	PX4_INFO("incompat_flags : %d", msg->incompat_flags);
+	PX4_INFO("compat_flags : %d", msg->compat_flags);
+	PX4_INFO("seq : %d", msg->seq);
+	PX4_INFO("source_system(sysid) : %d",(int)msg->sysid);
+	PX4_INFO("source_compoment(compid) : %d",(int)msg->compid);
+	PX4_INFO("msgid : %d",(int)msg->msgid);
+	PX4_INFO("=========payloads=========");
+	PX4_INFO("custom_mode : %d",new_mode.custom_mode);
+	PX4_INFO("target_system : %d",new_mode.target_system);
+	PX4_INFO("base_mode : %d", new_mode.base_mode);
+	PX4_INFO("custom_main_mode : %d",(new_mode.custom_mode & 0x00ff0000)>>16);
+	PX4_INFO("custom_sub_mode : %d", (new_mode.custom_mode & 0xff000000)>>24);
+	PX4_INFO("=========custom mode comparison=========");
+	PX4_INFO("from message, main_mode : %d",(new_mode.custom_mode & 0x00ff0000)>>16);
+	PX4_INFO("from message, sub_mode : %d", (new_mode.custom_mode & 0xff000000)>>24);
+	PX4_INFO("from parsed, main_mode : %d",custom_mode.main_mode);
+	PX4_INFO("from parsed, sub_mode : %d", custom_mode.sub_mode);
+
+	PX4_INFO("*********************************************");
+
 
 	_cmd_pub.publish(vcmd);
 }
@@ -2672,7 +2746,6 @@ MavlinkReceiver::Run()
 						_mavlink->handle_message(&msg);
 					}
 				}
-
 				/* count received bytes (nread will be -1 on read error) */
 				if (nread > 0) {
 					_mavlink->count_rxbytes(nread);
