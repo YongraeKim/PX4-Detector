@@ -16,6 +16,7 @@ using namespace std;
 
 UDP_SOCKET* udp_exit = nullptr;
 TCP_SOCKET* tcp_exit = nullptr;
+TCP_SOCKET* tcpqgc_exit = nullptr;
 
 void (*breakCapture)(int);
 int exit_code = -1;
@@ -34,8 +35,11 @@ int main()
     cout <<"UDP to TCP tunneling"<<endl;
     UDP_SOCKET *udp = new UDP_SOCKET("127.0.0.1",UDP_PORT,BUFFER_SIZE,UDP_SOCKET_TYPE::UDP_CLIENT);
     TCP_SOCKET *tcp = new TCP_SOCKET("NULL",1726,BUFFER_SIZE,TCP_SOCKET_TYPE::TCP_SOCKET_SERVER,1);
+    TCP_SOCKET *tcpqgc = new TCP_SOCKET("NULL",1464,BUFFER_SIZE,TCP_SOCKET_TYPE::TCP_SOCKET_SERVER,1);
+    
     udp_exit = udp;
     tcp_exit = tcp;
+    tcpqgc_exit = tcpqgc;
     udp->Create_Socket();
     udp->Bind();
     tcp->Create_Socket();

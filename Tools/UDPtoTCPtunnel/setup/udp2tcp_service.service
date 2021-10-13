@@ -1,0 +1,12 @@
+[Unit]
+Description = UDP to TCP tunneling for PX4 SITL
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/udp2tcp
+ExecStop=/usr/local/bin/udp2tcp
+Restart=on-failure
+RestartSec=2;
+
+[Install]
+WantedBy=multi-user.target

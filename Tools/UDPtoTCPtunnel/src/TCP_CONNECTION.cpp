@@ -209,7 +209,6 @@ namespace tcp_connection
                     enqueue_data.buffer = new uint8_t[enqueue_data.length];
                     memcpy(enqueue_data.buffer,receive_buffer,enqueue_data.length);
                     transmit_queue.push(enqueue_data);
-
                 }
                 pthread_mutex_unlock(&mutex_receive);
                 usleep(1000);
