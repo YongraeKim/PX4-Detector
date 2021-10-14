@@ -17,7 +17,7 @@ namespace tcp_connection
                 delete transmit_queue.front().buffer;
                 transmit_queue.pop();
             }
-            
+
             if(transmit_buffer!=nullptr)
             {
                 delete transmit_buffer;
@@ -127,7 +127,7 @@ namespace tcp_connection
             }
             return data_length;
         }
-        
+
         void TCP_CONNECTION::Register_Callback_Info(void (*callback_function)(void*,void*),void* arg0)
         {
 
@@ -147,7 +147,7 @@ namespace tcp_connection
             pthread_mutex_init(&mutex_ping,NULL);
             pthread_mutex_init(&mutex_receive,NULL);
             pthread_mutex_init(&mutex_transmit,NULL);
-            
+
         }
 
         void* TCP_CONNECTION::ping_thread_member(void* arg)
@@ -164,12 +164,12 @@ namespace tcp_connection
                 pthread_mutex_lock(&mutex_ping);
                 is_written = write(socket_fd,ping_buffer,sizeof(ping_buffer));
                 pthread_mutex_unlock(&mutex_ping);
-                
+
                 if(is_written<0)
                 {
                     exit_code = 1;
                 }
-                usleep(100000);
+                usleep(10000);
             }
         }
 
@@ -197,7 +197,7 @@ namespace tcp_connection
                     receive_queue.pop();
                 }
                 pthread_mutex_unlock(&mutex_ping);
-                pthread_mutex_unlock(&mutex_transmit);    
+                pthread_mutex_unlock(&mutex_transmit);
                 usleep(1000);
 
                 pthread_mutex_lock(&mutex_receive);
