@@ -206,6 +206,13 @@ int TCP_SOCKET::Receive_Data(uint8_t* buffer, int32_t read_size)
 int TCP_SOCKET::Receive_Data(std::queue<BUFFER_DATA> &queue_data)
 {
     vector<TCP_CONNECTION*>::iterator iter = _connection.begin();
+    if(_connection.empty())
+    {
+        while(!queue_data.empty())
+        {
+            queue_data.pop();
+        }
+    }
     for(iter;iter<_connection.end();iter++)
     {
         TCP_CONNECTION* connection = (TCP_CONNECTION*)*iter;
