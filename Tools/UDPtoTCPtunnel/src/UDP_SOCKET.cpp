@@ -63,7 +63,7 @@ int UDP_SOCKET::Receive_Data(uint8_t* buffer, int32_t read_size)
     {
         received_size = recvfrom(_socket_fd,
                                     _received_buffer,
-                                    _buffersize,0,
+                                    _buffersize,MSG_DONTWAIT,
                                     (struct sockaddr*)&_socket_address,
                                     &_socket_address_length);
         if(read_size>=received_size && read_size<=_buffersize)
@@ -85,7 +85,7 @@ int UDP_SOCKET::Receive_Data(std::queue<BUFFER_DATA> &receive_data)
     {
         received_size = recvfrom(_socket_fd,
                                     _received_buffer,
-                                    _buffersize,0,
+                                    _buffersize,MSG_DONTWAIT,
                                     (struct sockaddr*)&_socket_address,
                                     &_socket_address_length);
         if(received_size>0)
@@ -107,7 +107,7 @@ int UDP_SOCKET::Receive_Data()
     {
         received_size = recvfrom(_socket_fd,
                                     _received_buffer,
-                                    _buffersize,0,
+                                    _buffersize,MSG_DONTWAIT,
                                     (struct sockaddr*)&_socket_address,
                                     &_socket_address_length);
         if(received_size>0)

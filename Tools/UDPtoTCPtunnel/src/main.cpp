@@ -10,13 +10,12 @@
 
 using namespace std;
 
-#define UDP_PORT 14550
 #define BUFFER_SIZE 16384
 #define SOCKFD_EMPTY -1
 
-UDP_SOCKET* udp_exit = nullptr;
-TCP_SOCKET* tcp_exit = nullptr;
-TCP_SOCKET* tcpqgc_exit = nullptr;
+//UDP_SOCKET* udp_exit = nullptr;
+//TCP_SOCKET* tcp_exit = nullptr;
+//TCP_SOCKET* tcpqgc_exit = nullptr;
 
 void (*breakCapture)(int);
 int exit_code = -1;
@@ -28,66 +27,135 @@ void signalingHandler(int signo)
     std::terminate();
 }
 
-int main()
+int main(int argc, char* argv[])
 {
     breakCapture = signal(SIGINT, signalingHandler);
     signal(SIGPIPE, SIG_IGN);
     cout <<"UDP to TCP tunneling"<<endl;
-    UDP_SOCKET *udp = new UDP_SOCKET("127.0.0.1",UDP_PORT,BUFFER_SIZE,UDP_SOCKET_TYPE::UDP_CLIENT);
-    TCP_SOCKET *tcp = new TCP_SOCKET("NULL",1726,BUFFER_SIZE,TCP_SOCKET_TYPE::TCP_SOCKET_SERVER,1);
-    TCP_SOCKET *tcpqgc = new TCP_SOCKET("NULL",1464,BUFFER_SIZE,TCP_SOCKET_TYPE::TCP_SOCKET_SERVER,1);
-    
-    udp_exit = udp;
-    tcp_exit = tcp;
-    tcpqgc_exit = tcpqgc;
-    udp->Create_Socket();
-    udp->Bind();
-    tcp->Create_Socket();
-    if(tcp->Bind()==false)
-    {
-        cout <<"[TCP_ERROR] Stop executing tunneling"<<endl;
-        return 0;
-    }
-    tcp->Listen();
-    cout <<"[UDP2TCP INFO] start tunneling"<<endl;
 
-    uint8_t data_from_udp[BUFFER_SIZE] = {0,};
+    int udp_port = 14550;
+    int baseport = 1726;
+    int number_of_socket = 1;
+
+    //if argc >1, udp2tcp [number of vehicles] [baseport]
+    //example : ./udp2tcp 2 1234 ->two of vehicles, 1234 baseport on TCP socket
+    if(argc>1)
+    {
+        switch(argc)
+        {
+            case 2:
+                number_of_socket = atoi(argv[1]);
+            break;
+            case 3:
+                number_of_socket = atoi(argv[1]);
+                baseport = atoi(argv[1]);
+            break;
+        }
+    }
+    vector<UDP_SOCKET*> udp;
+    vector<TCP_SOCKET*> tcp;
+    for(int i=0;i<number_of_socket;i++)
+    {
+        UDP_SOCKET* pudp = new UDP_SOCKET("127.0.0.1",udp_port+i,BUFFER_SIZE,UDP_SOCKET_TYPE::UDP_CLIENT);
+        TCP_SOCKET* ptcp = new TCP_SOCKET("NULL",baseport+i,BUFFER_SIZE,TCP_SOCKET_TYPE::TCP_SOCKET_SERVER,1);
+        pudp->Create_Socket();
+        pudp->Bind();
+        ptcp->Create_Socket();
+        if(ptcp->Bind()==false)
+        {
+            cout <<"[TCP_ERROR] Stop executing tunneling"<<endl;
+            return 0;
+        }
+        ptcp->Listen();
+        cout <<"[UDP2TCP INFO] start tunneling on TCP port "<<baseport+i<<" UDP port " << udp_port+i<<endl;
+        udp.push_back(pudp);
+        tcp.push_back(ptcp);
+    }
+    cout <<"[UDP2TCP INFO] start tunneling"<<endl;
+    //UDP_SOCKET *udp = new UDP_SOCKET("127.0.0.1",UDP_PORT,BUFFER_SIZE,UDP_SOCKET_TYPE::UDP_CLIENT);
+    //TCP_SOCKET *tcp = new TCP_SOCKET("NULL",baseport,BUFFER_SIZE,TCP_SOCKET_TYPE::TCP_SOCKET_SERVER,1);
+    //TCP_SOCKET *tcpqgc = new TCP_SOCKET("NULL",1464,BUFFER_SIZE,TCP_SOCKET_TYPE::TCP_SOCKET_SERVER,1);
+    
+    //udp_exit = udp;
+    //tcp_exit = tcp;
+    //tcpqgc_exit = tcpqgc;
+    //udp->Create_Socket();
+    //udp->Bind();
+    //tcp->Create_Socket();
+    //if(tcp->Bind()==false)
+    //{
+    //    cout <<"[TCP_ERROR] Stop executing tunneling"<<endl;
+    //    return 0;
+    //}
+    //tcp->Listen();
+    //cout <<"[UDP2TCP INFO] start tunneling"<<endl;
+
+    // uint8_t data_from_udp[BUFFER_SIZE] = {0,};
     int32_t data_from_udp_length = -1;
-    uint8_t data_from_tcp[BUFFER_SIZE] = {0,};
+// uint8_t data_from_tcp[BUFFER_SIZE] = {0,};
     int32_t data_from_tcp_length = -1;
+    vector<UDP_SOCKET*>::iterator udp_iter;
+    vector<TCP_SOCKET*>::iterator tcp_iter;
+    
     while(exit_code != 1)
     {
-        // data_from_udp_length=udp->Receive_Data(data_from_udp,BUFFER_SIZE);
+        //number of udp and tcp must be matched. 1:1 tunneling
+        tcp_iter = tcp.begin();
+        int count = 0;
+        for(udp_iter = udp.begin(); udp_iter!=udp.end(); ++udp_iter)
+        {
+            UDP_SOCKET* udppt = (UDP_SOCKET*)*udp_iter;
+            TCP_SOCKET* tcppt = (TCP_SOCKET*)*tcp_iter;
+            data_from_udp_length = udppt->Receive_Data();
+            if(data_from_udp_length>0)
+            {
+                tcppt->Receive_Data(udppt->receive_queue);
+            }
+            data_from_tcp_length = tcppt->Write_Data(udppt->transmit_queue);
+            if(data_from_tcp_length>0)
+            {
+                udppt->Write_Data();
+            }
+            tcp_iter++;
+            usleep(250);
+        }
+        usleep(250);
+        // usleep(1000);
+        // for(tcp_iter = tcp.begin();tcp_iter!=tcp.end();tcp_iter++)
+        // {
+        //     data_from_tcp_length
+        // }
+        
+        // data_from_udp_length=udp->Receive_Data();
         // usleep(1000);
         // if(data_from_udp_length>0)
         // {
-        //     tcp->Receive_Data(data_from_udp,data_from_udp_length);
+        //     tcp->Receive_Data(udp->receive_queue);
         // }
-        // data_from_tcp_length = tcp->Write_Data(data_from_tcp,BUFFER_SIZE);
+        // usleep(1000);
+        // data_from_tcp_length = tcp->Write_Data(udp->transmit_queue);
         // usleep(1000);
         // if(data_from_tcp_length>0)
         // {
-        //     udp->Write_Data(data_from_tcp,data_from_tcp_length);
+        //     udp->Write_Data();
         // }
-
-        data_from_udp_length=udp->Receive_Data();
-        usleep(1000);
-        if(data_from_udp_length>0)
-        {
-            tcp->Receive_Data(udp->receive_queue);
-        }
-        usleep(1000);
-        data_from_tcp_length = tcp->Write_Data(udp->transmit_queue);
-        usleep(1000);
-        if(data_from_tcp_length>0)
-        {
-            udp->Write_Data();
-        }
     }
-    udp->Close_Socket();
-    tcp->Close_Socket();
-    delete udp;
-    delete tcp;
+    for(udp_iter = udp.begin();udp_iter!=udp.end();udp_iter++)
+    {
+        UDP_SOCKET* udppt = (UDP_SOCKET*)*udp_iter;
+        udppt->Close_Socket();
+        delete udppt;
+        udppt = nullptr;
+    }
+    for(tcp_iter = tcp.begin();tcp_iter!=tcp.end();tcp_iter++)
+    {
+        TCP_SOCKET* tcppt = (TCP_SOCKET*)*tcp_iter;
+        tcppt->Close_Socket();
+        delete tcppt;
+        tcppt = nullptr;
+    }
+    // delete udp;
+    // delete tcp;
     cout <<"end UDP to TCP tunneling"<<endl;
 }
 

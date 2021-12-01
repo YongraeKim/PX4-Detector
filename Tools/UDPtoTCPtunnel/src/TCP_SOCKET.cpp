@@ -178,7 +178,7 @@ bool TCP_SOCKET::Accept()
             connection_candidate->Start_Communication(Connection_Callback_Member,this,this->_buffersize);
             _connection.push_back(connection_candidate);
             _is_accept = true;
-            cout <<"[TCP_INFO] Connection established to "<<connection_string<<endl;
+            cout <<"[TCP_INFO] Connection established to "<<connection_string<<" port : "<<this->_socket_address.sin_port <<endl;
         }
     }
     else
