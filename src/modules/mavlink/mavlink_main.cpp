@@ -2058,6 +2058,8 @@ Mavlink::task_main(int argc, char *argv[])
 
 					} else if (strcmp(myoptarg,"web")==0){
 						_mode = MAVLINK_MODE_WEB;
+					} else if (strcmp(myoptarg,"normal")==0){
+						_mode = MAVLINK_MODE_NORMAL;
 					}
 					else {
 						PX4_ERR("invalid mode");
