@@ -76,6 +76,7 @@ int main()
         {
             tcp->Receive_Data(udp->receive_queue);
         }
+        usleep(1000);
         data_from_tcp_length = tcp->Write_Data(udp->transmit_queue);
         usleep(1000);
         if(data_from_tcp_length>0)

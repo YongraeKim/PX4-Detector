@@ -195,6 +195,7 @@ namespace tcp_connection
                     is_written = write(socket_fd,data.buffer,data.length);
                     delete data.buffer;
                     receive_queue.pop();
+                    usleep(10000);
                 }
                 pthread_mutex_unlock(&mutex_ping);
                 pthread_mutex_unlock(&mutex_transmit);
