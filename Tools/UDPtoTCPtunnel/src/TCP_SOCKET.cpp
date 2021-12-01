@@ -213,10 +213,13 @@ int TCP_SOCKET::Receive_Data(std::queue<BUFFER_DATA> &queue_data)
             queue_data.pop();
         }
     }
-    for(iter;iter<_connection.end();iter++)
+    else
     {
-        TCP_CONNECTION* connection = (TCP_CONNECTION*)*iter;
-        connection->Transmit_UDP_Data(queue_data);
+        for(iter;iter<_connection.end();iter++)
+        {
+            TCP_CONNECTION* connection = (TCP_CONNECTION*)*iter;
+            connection->Transmit_UDP_Data(queue_data);
+        }
     }
 }
 

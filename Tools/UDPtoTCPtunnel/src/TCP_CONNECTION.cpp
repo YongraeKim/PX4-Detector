@@ -100,7 +100,13 @@ namespace tcp_connection
             return return_len;
         }
 
-
+        bool TCP_CONNECTION::Make_Receive_Queue_Empty()
+        {
+            while(!receive_queue.empty())
+            {
+                receive_queue.pop();
+            }
+        }
         bool TCP_CONNECTION::Transmit_UDP_Data(std::queue<BUFFER_DATA> &queue_udp_data)
         {
             while(!queue_udp_data.empty())

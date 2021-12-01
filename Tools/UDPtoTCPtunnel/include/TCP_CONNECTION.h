@@ -26,6 +26,7 @@ namespace tcp_connection
         int Transmit_TCP_Data(uint8_t* tcp_to_udp, int32_t length);
         bool Transmit_UDP_Data(std::queue<BUFFER_DATA> &queue_udp_data);
         int Transmit_TCP_Data(std::queue<BUFFER_DATA> &queue_tcp_data);
+        bool Make_Receive_Queue_Empty();
 
     private:
         uint8_t *transmit_buffer = nullptr;
