@@ -197,11 +197,13 @@ namespace tcp_connection
                 //is_written = write(socket_fd,transmit_buffer,transmit_buffer_length);
                 while(!this->receive_queue.empty())
                 {
-                    BUFFER_DATA data = receive_queue.front();
-                    is_written = write(socket_fd,data.buffer,data.length);
-                    delete data.buffer;
-                    receive_queue.pop();
+//                    BUFFER_DATA data = receive_queue.front();
+                    is_written = write(socket_fd,receive_queue.front().buffer,receive_queue.front().length);
                     usleep(10000);
+                    delete receive_queue.front().buffer;
+                    receive_queue.pop();
+                    
+//                    delete data.buffer;
                 }
                 pthread_mutex_unlock(&mutex_ping);
                 pthread_mutex_unlock(&mutex_transmit);
@@ -219,6 +221,16 @@ namespace tcp_connection
                 }
                 pthread_mutex_unlock(&mutex_receive);
                 usleep(1000);
+            }
+            while(!receive_queue.empty())
+            {
+                delete receive_queue.front().buffer;
+                receive_queue.pop();
+            }
+            while(!transmit_queue.empty())
+            {
+                delete transmit_queue.front().buffer;
+                transmit_queue.pop();
             }
             exit_code = 2;
             callback_registered(callback_class,(void*)this);
