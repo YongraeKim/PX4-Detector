@@ -28,6 +28,12 @@ namespace tcp_connection
                 delete receive_buffer;
                 receive_buffer = nullptr;
             }
+            pthread_mutex_unlock(&mutex_receive);
+            pthread_mutex_unlock(&mutex_transmit);
+            pthread_mutex_unlock(&mutex_ping);
+            pthread_mutex_destroy(&mutex_receive);
+            pthread_mutex_destroy(&mutex_transmit);
+            pthread_mutex_destroy(&mutex_ping);
             if(socket_fd!=-1)
             {
                 close(socket_fd);
@@ -141,7 +147,11 @@ namespace tcp_connection
             int flag;
             flag = fcntl(socket_fd, F_GETFL, 0 );
             //fcntl(socket_fd, F_SETFL, flag | O_NONBLOCK );
-            fcntl(socket_fd, F_SETFL, fcntl(socket_fd,F_GETFL,0) | O_NONBLOCK );
+            int status = fcntl(socket_fd, F_SETFL, fcntl(socket_fd,F_GETFL,0) | O_NONBLOCK );
+            if(status==-1)
+            {
+                std::cout <<"[TCP ERROR]non blocking setting failed on PING"<<std::endl;
+            }
             // struct timeval tv;
             // tv.tv_sec = 0;
             // tv.tv_usec = 10000;
@@ -154,7 +164,6 @@ namespace tcp_connection
             pthread_mutex_init(&mutex_ping,NULL);
             pthread_mutex_init(&mutex_receive,NULL);
             pthread_mutex_init(&mutex_transmit,NULL);
-
         }
 
         void* TCP_CONNECTION::ping_thread_member(void* arg)
@@ -178,7 +187,10 @@ namespace tcp_connection
                     exit_code = 1;
                 }
                 usleep(500000);
+                std::cout <<"ping"<<std::endl;
             }
+            pthread_mutex_unlock(&mutex_ping);
+            
         }
 
         void* TCP_CONNECTION::data_thread_member(void* arg)
@@ -191,10 +203,20 @@ namespace tcp_connection
             int is_written = -1;
             int counter = 0;
             receive_buffer_length = 0;
+            std::cout <<"[TCP_INFO]UDP<->TCP data tunneling start"<<std::endl;
+            //for non-blocking tcp socket
+            int flag;
+            flag = fcntl(socket_fd, F_GETFL, 0 );
+            //fcntl(socket_fd, F_SETFL, flag | O_NONBLOCK );
+            int status = fcntl(socket_fd, F_SETFL, fcntl(socket_fd,F_GETFL,0) | O_NONBLOCK );
+            if(status==-1)
+            {
+                std::cout <<"[TCP ERROR]non blocking setting failed on PING"<<std::endl;
+            }
             while(exit_code !=1)
             {
                 pthread_mutex_lock(&mutex_transmit);
-                pthread_mutex_lock(&mutex_ping);
+                //pthread_mutex_lock(&mutex_ping);
                 //write received data to tcp client
                 //is_written = write(socket_fd,transmit_buffer,transmit_buffer_length);
                 while(!this->receive_queue.empty())
@@ -207,7 +229,7 @@ namespace tcp_connection
                     
 //                    delete data.buffer;
                 }
-                pthread_mutex_unlock(&mutex_ping);
+                //pthread_mutex_unlock(&mutex_ping);
                 pthread_mutex_unlock(&mutex_transmit);
                 usleep(1000);
 
@@ -234,8 +256,12 @@ namespace tcp_connection
                 delete transmit_queue.front().buffer;
                 transmit_queue.pop();
             }
+            pthread_mutex_unlock(&mutex_receive);
+            pthread_mutex_unlock(&mutex_transmit);
+            pthread_mutex_unlock(&mutex_ping);
             exit_code = 2;
             callback_registered(callback_class,(void*)this);
+            std::cout <<"[TCP_INFO]UDP<->TCP data tunneling end"<<std::endl;
             pthread_exit(&exit_code);
         }
 }
