@@ -175,7 +175,7 @@ namespace tcp_connection
                 {
                     exit_code = 1;
                 }
-                usleep(100000);
+                usleep(1000000);
             }
         }
 

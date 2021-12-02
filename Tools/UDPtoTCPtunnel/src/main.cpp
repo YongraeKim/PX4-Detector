@@ -111,6 +111,7 @@ int main(int argc, char* argv[])
             {
                 tcppt->Receive_Data(udppt->receive_queue);
             }
+            usleep(250);
             data_from_tcp_length = tcppt->Write_Data(udppt->transmit_queue);
             if(data_from_tcp_length>0)
             {
