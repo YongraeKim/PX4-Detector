@@ -140,7 +140,8 @@ namespace tcp_connection
             //for non-blocking tcp socket
             int flag;
             flag = fcntl(socket_fd, F_GETFL, 0 );
-            fcntl(socket_fd, F_SETFL, flag | O_NONBLOCK );
+            //fcntl(socket_fd, F_SETFL, flag | O_NONBLOCK );
+            fcntl(socket_fd, F_SETFL, fcntl(socket_fd,F_GETFL,0) | O_NONBLOCK );
             // struct timeval tv;
             // tv.tv_sec = 0;
             // tv.tv_usec = 10000;
@@ -169,13 +170,14 @@ namespace tcp_connection
             {
                 pthread_mutex_lock(&mutex_ping);
                 is_written = write(socket_fd,ping_buffer,sizeof(ping_buffer));
+                //transmitted_size = sendto(_socket_fd,buffer,write_size,0,
+                //                    (struct sockaddr*)&_socket_address,sizeof(_socket_address)); 
                 pthread_mutex_unlock(&mutex_ping);
-
                 if(is_written<0)
                 {
                     exit_code = 1;
                 }
-                usleep(1000000);
+                usleep(500000);
             }
         }
 
