@@ -230,17 +230,24 @@ fi
 #
 sh etc/init.d/rc.vehicle_setup
 
+
+
 # GCS link
-mavlink start -x -u $udp_gcs_port_local -r 4000000 -m normal
+mavlink start -x -u $udp_gcs_port_local -r 4000000 # -m normal
+
+# mavlink start -x -u 14556 -r 4000000 -f # -m normal
+
+# mavlink start -x -u 24550 -f -o 34550 # -m normal
+
 
 # mavlink stream -r 1 -s POSITION_TARGET_LOCAL_NED -u $udp_gcs_port_local
 # mavlink stream -r 1 -s LOCAL_POSITION_NED -u $udp_gcs_port_local
 # mavlink stream -r 1 -s GLOBAL_POSITION_INT -u $udp_gcs_port_local
-# mavlink stream -r 1 -s ATTITUDE -u $udp_gcs_port_local
-# mavlink stream -r 1 -s ATTITUDE_QUATERNION -u $udp_gcs_port_local
-# mavlink stream -r 1 -s ATTITUDE_TARGET -u $udp_gcs_port_local
+# mavlink stream -r 15 -s ATTITUDE -u $udp_gcs_port_local
+# # mavlink stream -r 1 -s ATTITUDE_QUATERNION -u $udp_gcs_port_local
+# mavlink stream -r 2 -s ATTITUDE_TARGET -u $udp_gcs_port_local
 # mavlink stream -r 1 -s SERVO_OUTPUT_RAW_0 -u $udp_gcs_port_local
-# mavlink stream -r 1 -s RC_CHANNELS -u $udp_gcs_port_local
+# mavlink stream -r 5 -s RC_CHANNELS -u $udp_gcs_port_local
 # mavlink stream -r 1 -s OPTICAL_FLOW_RAD -u $udp_gcs_port_local
 #
 

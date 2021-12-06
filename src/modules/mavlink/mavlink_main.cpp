@@ -1270,8 +1270,8 @@ Mavlink::add_orb_subscription(const orb_id_t topic, int instance, bool disable_s
 int
 Mavlink::configure_stream(const char *stream_name, const float rate)
 {
-	PX4_DEBUG("configure_stream(%s, %.3f)", stream_name, (double)rate);
-	PX4_INFO("configure_stream(%s, %.3f)", stream_name, (double)rate);
+	//PX4_DEBUG("configure_stream(%s, %.3f)", stream_name, (double)rate);
+	//PX4_INFO("configure_stream(%s, %.3f)", stream_name, (double)rate);
 
 	/* calculate interval in us, -1 means unlimited stream, 0 means disabled */
 	int interval = 0;
@@ -1603,13 +1603,13 @@ Mavlink::configure_streams_to_default(const char *configure_single_stream)
 	PX4_INFO("stream mode : %d",_mode);
 	switch (_mode) {
 	case MAVLINK_MODE_NORMAL:
-		configure_stream_local("ADSB_VEHICLE", unlimited_rate);
+		configure_stream_local("ADSB_VEHICLE", 0.5f);
 		configure_stream_local("ALTITUDE", 1.0f);
 		configure_stream_local("ATTITUDE", 15.0f);
 		configure_stream_local("ATTITUDE_TARGET", 2.0f);
 		configure_stream_local("BATTERY_STATUS", 0.5f);
 		configure_stream_local("CAMERA_IMAGE_CAPTURED", unlimited_rate);
-		configure_stream_local("COLLISION", unlimited_rate);
+		configure_stream_local("COLLISION", 0.5f);
 		configure_stream_local("DEBUG", 1.0f);
 		configure_stream_local("DEBUG_FLOAT_ARRAY", 1.0f);
 		configure_stream_local("DEBUG_VECT", 1.0f);

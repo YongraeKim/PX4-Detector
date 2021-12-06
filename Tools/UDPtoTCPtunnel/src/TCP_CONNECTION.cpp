@@ -129,12 +129,12 @@ namespace tcp_connection
                 BUFFER_DATA data = transmit_queue.front();
                 queue_tcp_data.push(data);
                 data_length = data_length+data.length;
-                std::cout <<"[TCP] Rx Data : ";
-                for(int i=0;i<data.length;i++)
-                {
-                    printf("%x ",data.buffer[i]);
-                }
-                printf("\r\n");
+                // std::cout <<"[TCP] Rx Data : ";
+                // for(int i=0;i<data.length;i++)
+                // {
+                //     printf("%x ",data.buffer[i]);
+                // }
+                // printf("\r\n");
                 transmit_queue.pop();
             }
             return data_length;
@@ -187,7 +187,6 @@ namespace tcp_connection
                     exit_code = 1;
                 }
                 usleep(500000);
-                std::cout <<"ping"<<std::endl;
             }
             pthread_mutex_unlock(&mutex_ping);
             
@@ -223,7 +222,7 @@ namespace tcp_connection
                 {
 //                    BUFFER_DATA data = receive_queue.front();
                     is_written = write(socket_fd,receive_queue.front().buffer,receive_queue.front().length);
-                    usleep(10000);
+                    usleep(1000);
                     delete receive_queue.front().buffer;
                     receive_queue.pop();
                     

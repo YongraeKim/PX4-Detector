@@ -47,6 +47,8 @@
 #include <drivers/drv_tone_alarm.h>
 #include <ecl/geo/geo.h>
 
+//#define MAVLINK_DEBUG
+
 #ifdef CONFIG_NET
 #include <net/if.h>
 #include <arpa/inet.h>
@@ -402,6 +404,7 @@ MavlinkReceiver::handle_message_command_long(mavlink_message_t *msg)
 	vcmd.source_component = msg->compid;
 	vcmd.confirmation = cmd_mavlink.confirmation;
 	vcmd.from_external = true;
+#ifdef MAVLINK_DEBUG
 	PX4_INFO("*********************************************");
 	PX4_INFO("Message Info for handle_message_command_long");
 	PX4_INFO("magic : %d", msg->magic);
@@ -425,7 +428,7 @@ MavlinkReceiver::handle_message_command_long(mavlink_message_t *msg)
 	PX4_INFO("param6 : %lf",(double)cmd_mavlink.param6);
 	PX4_INFO("param7 : %lf",(double)cmd_mavlink.param7);
 	PX4_INFO("*********************************************");
-
+#endif
 	handle_message_command_both(msg, cmd_mavlink, vcmd);
 }
 
@@ -454,6 +457,7 @@ MavlinkReceiver::handle_message_command_int(mavlink_message_t *msg)
 	vcmd.source_component = msg->compid;
 	vcmd.confirmation = false;
 	vcmd.from_external = true;
+#ifdef MAVLINK_DEBUG
 	PX4_INFO("*********************************************");
 	PX4_INFO("Message Info for handle_message_command_int");
 	PX4_INFO("magic : %d", msg->magic);
@@ -480,7 +484,7 @@ MavlinkReceiver::handle_message_command_int(mavlink_message_t *msg)
 	PX4_INFO("z : %d",(int)cmd_mavlink.z);
 	PX4_INFO("*********************************************");
 	PX4_INFO(" ");
-
+#endif
 
 	handle_message_command_both(msg, cmd_mavlink, vcmd);
 }
@@ -559,8 +563,9 @@ void MavlinkReceiver::handle_message_command_both(mavlink_message_t *msg, const 
 
 		if (!send_ack) {
 			_cmd_pub.publish(vehicle_command);
+#ifdef MAVLINK_DEBUG
 			PX4_INFO("Command published at mavlink_received");
-
+#endif
 		}
 	}
 
@@ -715,7 +720,7 @@ MavlinkReceiver::handle_message_set_mode(mavlink_message_t *msg)
 	vcmd.source_component = msg->compid;
 	vcmd.confirmation = true;
 	vcmd.from_external = true;
-
+#ifdef MAVLINK_DEBUG
 	PX4_INFO("*********************************************");
 	PX4_INFO("Message Info for handle_message_set_mode");
 	PX4_INFO("magic : %d", msg->magic);
@@ -739,7 +744,7 @@ MavlinkReceiver::handle_message_set_mode(mavlink_message_t *msg)
 	PX4_INFO("from parsed, sub_mode : %d", custom_mode.sub_mode);
 
 	PX4_INFO("*********************************************");
-
+#endif
 
 	_cmd_pub.publish(vcmd);
 }
